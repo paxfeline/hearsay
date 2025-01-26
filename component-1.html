@@ -1,5 +1,26 @@
 <script>
-    console.log(noAct.elements.current);
+    noAct.init({
+        connectedCallback: e => console.log(e),
+        disconnectedCallback: e => console.log(e),
+        adoptedCallback: e => console.log(e),
+        attributeChangedCallback: e => console.log(e),
+        react: (self, data) =>
+        {
+            console.log(data, self);
+
+            if (data == "inc")
+            {
+                self.num++;
+                self.update(self);
+            }
+        },
+        init: self =>
+        {
+            self.num = 0;
+            self.update(self);
+        },
+        update: self => self.slot("slot-1", self.num)
+    });
 </script>
 <div class="c1">
     <h1>Hello</h1>
