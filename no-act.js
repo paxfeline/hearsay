@@ -2,10 +2,14 @@ window.noAct = {
     init(opts)
     {
         console.log("init", opts, this.elements.current);
+
+        // copy all properties from opts to element
         Object.assign(this.elements.current, opts);
-        this.elements.current.opts = opts;
+
+        // call the init function (if present)
         opts.init?.(this.elements.current);
-    }
+    },
+    key: Symbol("no-act key")
 };
 
 class DataConsumer extends HTMLElement {
@@ -16,12 +20,20 @@ class DataConsumer extends HTMLElement {
 
     connectedCallback()
     {
-        fetch(this.dataset.struct)
+        console.log(this.getAttribute("struct"));
+        // fetch the component html file
+        // and attach a shadow DOM
+        fetch(this.getAttribute("struct"))
         .then( res => res.text() )
         .then( txt => this.attachShadow({mode: "open"}).innerHTML = txt )
         .then( () =>
         {
+            // keep track of the element currently being inited
             noAct.elements = {current: this, previous: noAct.elements?.current};
+
+            // if a script is present, it's not run by default.
+            // create a new script element, copy the code,
+            // and replace the non-functional script element with it.
             const oldScript = this.shadowRoot.querySelector("script");
             if (oldScript)
             {
@@ -29,8 +41,19 @@ class DataConsumer extends HTMLElement {
                 newScript.textContent = oldScript.textContent;
                 oldScript.replaceWith(newScript);
             }
+
+            // add "component" property to all children of shadrow root
+            const addComponentAttribute = (el) =>
+            {
+                el.component = this;
+                Array.from(el.children || []).forEach(rel => addComponentAttribute(rel));
+            }
+            addComponentAttribute(this.shadowRoot);
+
+            // revert elements
             noAct.elements = noAct.elements.previous;
         } )
+
         this.opts?.connectedCallback?.();
     }
 
@@ -67,7 +90,12 @@ class DataConsumer extends HTMLElement {
         );
     }
 
-    static observedAttributes = ["props"];
+    get key()
+    {
+        return this.getAttribute("key");
+    }
+
+    static observedAttributes = ["props", "key"];
 }
 
 customElements.define("data-consumer", DataConsumer);

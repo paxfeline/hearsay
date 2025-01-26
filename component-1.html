@@ -4,27 +4,27 @@
         disconnectedCallback: e => console.log(e),
         adoptedCallback: e => console.log(e),
         attributeChangedCallback: e => console.log(e),
-        react: (self, data) =>
-        {
-            console.log(data, self);
-
-            if (data == "inc")
-            {
-                self.num++;
-                self.update(self);
-            }
-        },
+        update: self => self.slot("slot-1", self.num), // user-defined helper
         init: self =>
         {
             self.num = 0;
             self.update(self);
         },
-        update: self => self.slot("slot-1", self.num)
+        react: (self, data, recipients) =>
+        {
+            console.log(self);
+
+            if (data == "inc" && self.key == recipients)
+            {
+                self.num++;
+                self.update(self);
+            }
+        },
     });
 </script>
 <div class="c1">
     <h1>Hello</h1>
-    <data-consumer data-struct="component-2.html"></data-consumer>
+    <data-consumer struct="component-2.html">click me!</data-consumer>
     <div class="c2">
         <slot name="slot-1"></slot>
         <slot name="slot-2"></slot>

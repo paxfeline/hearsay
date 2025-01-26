@@ -1,6 +1,10 @@
 <script>
     noAct.init({
+
+        init: self => (console.log(self), self.setAttribute("key", self.component.key))
         
     });
 </script>
-<button onClick="noAct.broadcast('inc')">click!</button>
+<button onclick="console.log(42); noAct.broadcast('inc', this.component.key)">
+    <slot></slot>
+</button>
