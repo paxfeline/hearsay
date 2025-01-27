@@ -46,8 +46,6 @@ class DataConsumer extends HTMLElement {
                 const addComponentAttribute = (el) =>
                 {
                     el.component = this;
-                    for (const prop in el) { const val = el[prop]; if (typeof val == "function") el[prop] = val.bind(null, this); }
-                    Object.entries(el).forEach( ([key, val], ind, arr) => console.log(key, val, ind, arr) );
                     Array.from(el.children || []).forEach(rel => addComponentAttribute(rel));
                 }
                 addComponentAttribute(this.shadowRoot);
