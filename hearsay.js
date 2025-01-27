@@ -1,6 +1,6 @@
-window.noAct = {}
+window.Hearsay = {}
 
-function init(opts)
+function setup(opts)
 {
     // copy all properties from opts to element
     Object.assign(this.elements.current, opts);
@@ -9,7 +9,7 @@ function init(opts)
     opts.init?.(this.elements.current);
 }
 
-noAct.init = init.bind(noAct);
+Hearsay.setup = setup.bind(Hearsay);
 
 class DataConsumer extends HTMLElement {
     constructor()
@@ -29,7 +29,7 @@ class DataConsumer extends HTMLElement {
             .then( () =>
             {
                 // keep track of the element currently being inited
-                noAct.elements = {current: this, previous: noAct.elements?.current};
+                Hearsay.elements = {current: this, previous: Hearsay.elements?.current};
     
                 // if a script is present, it's not run by default.
                 // create a new script element, copy the code,
@@ -51,31 +51,11 @@ class DataConsumer extends HTMLElement {
                 addComponentAttribute(this.shadowRoot);
     
                 // revert elements
-                noAct.elements = noAct.elements.previous;
+                Hearsay.elements = Hearsay.elements.previous;
             } )
         }
 
-        this.opts?.connectedCallback?.();
-    }
-
-    disconnectedCallback()
-    {
-        this.opts?.disconnectedCallback?.();
-    }
-
-    adoptedCallback()
-    {
-        this.opts?.adoptedCallback?.();
-    }
-
-    attributeChangedCallback()
-    {
-        this.opts?.attributeChangedCallback?.();
-    }
-
-    react(data)
-    {
-        this.opts?.react?.(this, data);
+        this.customConnectedCallback?.();
     }
 
     /* util functions */
@@ -83,12 +63,24 @@ class DataConsumer extends HTMLElement {
     slot(name, ...data)
     {
         console.log(data);
-        // if no data to set, return value
-        if (data === undefined) return this.querySelector(`[slot="${name}"]`).children;
-
-        (name == "slot" ? this : this.querySelector(`[slot="${name}"]`)).replaceChildren(...data
-            .map( el => el.nodeType ? el : document.createTextNode(el) )
-        );
+        
+        // if the default slot is replaced, first save all named slots
+        // replace everything, and put back named slots
+        if (name == "slot")
+        {
+            const slots = Array.from(this.querySelectorAll("[slot]"));
+            this.replaceChildren(
+                ...data.map( el => el.nodeType ? el : document.createTextNode(el) ),
+                ...slots
+            );
+        }
+        // if named slot, just replace its children
+        else
+        {
+            this.querySelector(`[slot="${name}"]`).replaceChildren(
+                ...data.map( el => el.nodeType ? el : document.createTextNode(el) )
+            );
+        }
     }
     
     // key and props should accept JS code
@@ -133,10 +125,13 @@ function broadcast(data, recipients)
     
     // elements with data-consumer attribute
     const allConsumerCallbacks = document.querySelectorAll("[data-consumer]");
-    allConsumerCallbacks.forEach( consumer => consumer(consumer, data, recipients) );
+    allConsumerCallbacks.forEach( consumer =>
+        Function("consumer, data, recipients",
+        consumer.dataset.consumer)
+        (consumer, data, recipients) );
 }
 
-noAct.broadcast = broadcast.bind(noAct);;
+Hearsay.broadcast = broadcast.bind(Hearsay);;
 
-// copy all noAct methods (init, broadcast) to global scope
-Object.assign(window, noAct);
+// copy all Hearsay methods (init, broadcast) to global scope
+Object.assign(window, Hearsay);
