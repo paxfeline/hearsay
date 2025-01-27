@@ -86,9 +86,27 @@ class DataConsumer extends HTMLElement {
         );
     }
     
+    // key and props should accept JS code
+    // and fall back to their string values
+
+    get props()
+    {
+        if (!this._props)
+            this.props = this.getAttribute("props");
+        return this._props?.();
+    }
+
+    set props(val)
+    {
+        this.setAttribute("props", val);
+        this._props = Function(`return ${val}`);
+    }
+    
     get key()
     {
-        return this._key?.() || this.getAttribute("key");
+        if (!this._key)
+            this.key = this.getAttribute("key");
+        return this._key?.();
     }
 
     set key(val)
@@ -114,3 +132,6 @@ function broadcast(data, recipients)
 }
 
 noAct.broadcast = broadcast;
+
+// copy all noAct methods (init, broadcast) to global scope
+Object.assign(window, noAct);

@@ -1,11 +1,11 @@
 <script>
-    noAct.init({
+    init({
 
         // set this component's key to the same as its parent's
         init: self => self.key = self.component.key
         
     });
 </script>
-<button onclick="noAct.broadcast('inc', this.component.key)">
+<button onclick="broadcast('inc', this.component.key)">
     <slot></slot>
 </button>
