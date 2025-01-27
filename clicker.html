@@ -1,0 +1,32 @@
+<script>
+    init({
+        // update is a user-defined function
+        // slot is a utility function
+        update: self => self.slot("slot", self.num, "!"),
+        init: self =>
+        {
+            self.num = 0;
+            self.update(self);
+        },
+        react: (self, data, recipients) =>
+        {
+            if (data == "inc" && self.key == recipients)
+            {
+                self.num++;
+                self.update(self);
+            }
+        },
+    });
+</script>
+<div class="c1">
+    <h1 slot="slot-1">Clicker</h1>
+    <div class="c2">
+        You have clicked
+        <slot></slot>
+        times!
+    </div>
+
+    <button onclick="broadcast('inc', this.key)">
+        Click
+    </button>
+</div>

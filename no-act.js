@@ -21,36 +21,39 @@ class DataConsumer extends HTMLElement {
     {
         // fetch the component html file
         // and attach a shadow DOM
-        fetch(this.getAttribute("struct"))
-        .then( res => res.text() )
-        .then( txt => this.attachShadow({mode: "open"}).innerHTML = txt )
-        .then( () =>
+        if (this.hasAttribute("struct"))
         {
-            // keep track of the element currently being inited
-            noAct.elements = {current: this, previous: noAct.elements?.current};
-
-            // if a script is present, it's not run by default.
-            // create a new script element, copy the code,
-            // and replace the non-functional script element with it.
-            const oldScript = this.shadowRoot.querySelector("script");
-            if (oldScript)
+            fetch(this.getAttribute("struct"))
+            .then( res => res.text() )
+            .then( txt => this.attachShadow({mode: "open"}).innerHTML = txt )
+            .then( () =>
             {
-                const newScript = document.createElement("script");
-                newScript.textContent = oldScript.textContent;
-                oldScript.replaceWith(newScript);
-            }
-
-            // add "component" property to all children of shadrow root
-            const addComponentAttribute = (el) =>
-            {
-                el.component = this;
-                Array.from(el.children || []).forEach(rel => addComponentAttribute(rel));
-            }
-            addComponentAttribute(this.shadowRoot);
-
-            // revert elements
-            noAct.elements = noAct.elements.previous;
-        } )
+                // keep track of the element currently being inited
+                noAct.elements = {current: this, previous: noAct.elements?.current};
+    
+                // if a script is present, it's not run by default.
+                // create a new script element, copy the code,
+                // and replace the non-functional script element with it.
+                const oldScript = this.shadowRoot.querySelector("script");
+                if (oldScript)
+                {
+                    const newScript = document.createElement("script");
+                    newScript.textContent = oldScript.textContent;
+                    oldScript.replaceWith(newScript);
+                }
+    
+                // add "component" property to all children of shadrow root
+                const addComponentAttribute = (el) =>
+                {
+                    el.component = this;
+                    Array.from(el.children || []).forEach(rel => addComponentAttribute(rel));
+                }
+                addComponentAttribute(this.shadowRoot);
+    
+                // revert elements
+                noAct.elements = noAct.elements.previous;
+            } )
+        }
 
         this.opts?.connectedCallback?.();
     }
@@ -83,7 +86,7 @@ class DataConsumer extends HTMLElement {
         // if no data to set, return value
         if (data === undefined) return this.querySelector(`[slot="${name}"]`).children;
 
-        this.querySelector(`[slot="${name}"]`).replaceChildren(...data
+        (name == "slot" ? this : this.querySelector(`[slot="${name}"]`)).replaceChildren(...data
             .map( el => el.nodeType ? el : document.createTextNode(el) )
         );
     }
