@@ -1,13 +1,15 @@
-window.noAct = {
-    init(opts)
-    {
-        // copy all properties from opts to element
-        Object.assign(this.elements.current, opts);
+window.noAct = {}
 
-        // call the init function (if present)
-        opts.init?.(this.elements.current);
-    }
-};
+function init(opts)
+{
+    // copy all properties from opts to element
+    Object.assign(this.elements.current, opts);
+
+    // call the init function (if present)
+    opts.init?.(this.elements.current);
+}
+
+noAct.init = init.bind(noAct);
 
 class DataConsumer extends HTMLElement {
     constructor()
@@ -75,12 +77,12 @@ class DataConsumer extends HTMLElement {
 
     /* util functions */
 
-    slot(name, data)
+    slot(name, ...data)
     {
+        console.log(data);
         // if no data to set, return value
         if (data === undefined) return this.querySelector(`[slot="${name}"]`).children;
 
-        if (!Array.isArray(data)) data = [data];
         this.querySelector(`[slot="${name}"]`).replaceChildren(...data
             .map( el => el.nodeType ? el : document.createTextNode(el) )
         );
@@ -131,7 +133,7 @@ function broadcast(data, recipients)
     allConsumerCallbacks.forEach( consumer => consumer(consumer, data, recipients) );
 }
 
-noAct.broadcast = broadcast;
+noAct.broadcast = broadcast.bind(noAct);;
 
 // copy all noAct methods (init, broadcast) to global scope
 Object.assign(window, noAct);

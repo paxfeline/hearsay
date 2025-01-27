@@ -2,7 +2,7 @@
     init({
         // update is a user-defined function
         // slot is a utility function
-        update: self => self.slot("slot-1", self.num),
+        update: self => self.slot("slot-1", self.num, "!"),
         init: self =>
         {
             self.num = 0;
