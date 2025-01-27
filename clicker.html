@@ -2,7 +2,7 @@
     init({
         // update is a user-defined function
         // slot is a utility function
-        update: self => self.slot("slot", self.num, "!"),
+        update: self => self.slot("slot", self.num),
         init: self =>
         {
             self.num = 0;
@@ -26,7 +26,7 @@
         times!
     </div>
 
-    <button onclick="broadcast('inc', this.key)">
+    <button onclick="broadcast('inc', this.component.key)">
         Click
     </button>
 </div>

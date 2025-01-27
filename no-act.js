@@ -46,6 +46,8 @@ class DataConsumer extends HTMLElement {
                 const addComponentAttribute = (el) =>
                 {
                     el.component = this;
+                    for (const prop in el) { const val = el[prop]; if (typeof val == "function") el[prop] = val.bind(null, this); }
+                    Object.entries(el).forEach( ([key, val], ind, arr) => console.log(key, val, ind, arr) );
                     Array.from(el.children || []).forEach(rel => addComponentAttribute(rel));
                 }
                 addComponentAttribute(this.shadowRoot);
@@ -104,7 +106,7 @@ class DataConsumer extends HTMLElement {
     set props(val)
     {
         this.setAttribute("props", val);
-        this._props = Function(`return ${val}`);
+        this._props = Function(`try { return ${val}; } catch { return "${val}"; }`);
     }
     
     get key()
@@ -117,7 +119,7 @@ class DataConsumer extends HTMLElement {
     set key(val)
     {
         this.setAttribute("key", val);
-        this._key = Function(`return ${val}`);
+        this._key = Function(`try { return ${val}; } catch { return "${val}"; }`);
     }
 
     static observedAttributes = ["props", "key"];

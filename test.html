@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    customElements.define('test-one',
+      class extends HTMLElement {
+        constructor() {
+          super()
+          console.log(this.textContent)
+        }
+        connectedCallback() {
+          console.log(this.textContent)
+        }
+      }
+    )
+  </script>
+</head>
+
+<body>
+  <test-one>First.</test-one>
+</body>
+</html>
