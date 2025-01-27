@@ -1,5 +1,4 @@
 # Hearsay
-
 ## simple web components
 
 Hearsay is a very simple framework for creating web components that can broadcast and receive messages. A [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) `data-consumer` is defined, and uses the `struct` attribute to specify the URL of an HTML file to be used to create the custom element's [shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
@@ -31,7 +30,7 @@ Every element inside a component has a `component` property set that points to t
 
 ### `data-consumer` attribute:
 
-You can add a `data-consumer` attribute to any HTML element. The value is interpretted as the code for a function.
+You can add a `data-consumer` attribute to any HTML element. The value is interpreted as the code for a function.
 
   #### `data-consumer` function:
 
@@ -75,7 +74,7 @@ The contents of these files are fetched and attached as the shadow root of the `
 
       Parameters:
 
-      - consumer: The component or element recieving the message.
+      - consumer: The component or element receiving the message.
       - data
       - recipients
 
