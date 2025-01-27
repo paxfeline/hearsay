@@ -1,9 +1,5 @@
 <script>
     noAct.init({
-        connectedCallback: e => console.log(e),
-        disconnectedCallback: e => console.log(e),
-        adoptedCallback: e => console.log(e),
-        attributeChangedCallback: e => console.log(e),
         update: self => self.slot("slot-1", self.num), // user-defined helper
         init: self =>
         {
@@ -12,8 +8,6 @@
         },
         react: (self, data, recipients) =>
         {
-            console.log(self);
-
             if (data == "inc" && self.key == recipients)
             {
                 self.num++;

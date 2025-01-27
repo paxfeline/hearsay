@@ -1,15 +1,12 @@
 window.noAct = {
     init(opts)
     {
-        console.log("init", opts, this.elements.current);
-
         // copy all properties from opts to element
         Object.assign(this.elements.current, opts);
 
         // call the init function (if present)
         opts.init?.(this.elements.current);
-    },
-    key: Symbol("no-act key")
+    }
 };
 
 class DataConsumer extends HTMLElement {
@@ -20,7 +17,6 @@ class DataConsumer extends HTMLElement {
 
     connectedCallback()
     {
-        console.log(this.getAttribute("struct"));
         // fetch the component html file
         // and attach a shadow DOM
         fetch(this.getAttribute("struct"))
@@ -89,10 +85,16 @@ class DataConsumer extends HTMLElement {
             .map( el => el.nodeType ? el : document.createTextNode(el) )
         );
     }
-
+    
     get key()
     {
-        return this.getAttribute("key");
+        return this._key?.() || this.getAttribute("key");
+    }
+
+    set key(val)
+    {
+        this.setAttribute("key", val);
+        this._key = Function(`return ${val}`);
     }
 
     static observedAttributes = ["props", "key"];
