@@ -21,9 +21,9 @@ class HearSay extends HTMLElement {
     {
         // fetch the component html file
         // and attach a shadow DOM
-        if (this.hasAttribute("struct"))
+        if (this.hasAttribute("src"))
         {
-            fetch(this.getAttribute("struct"))
+            fetch(this.getAttribute("src"))
             .then( res => res.text() )
             .then( txt => this.attachShadow({mode: "open"}).innerHTML = txt )
             .then( () =>

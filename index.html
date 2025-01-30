@@ -3,13 +3,14 @@
         <script src="hearsay.js"></script>
     </head>
     <body>
-        <hear-say struct="clicker.html" props="{foo: 'bar'}" key="1">
-            <span slot="subheading">Click while you can!
-                <j-s>self.component?.props.foo</j-s>
+        <hear-say src="clicker.html" props="{title: 'titular item'}" key="1">
+            <span slot="title">
+                <j-s>self.component?.props.title</j-s>
             </span>
+            <span slot="subheading">Click while you can!</span>
         </hear-say>
-        <!-- hear-say struct="clicker.html" key="2">
+        <hear-say src="clicker.html" key="2">
             <span slot="title">Click'im</span>
-        </hear-say -->
+        </hear-say>
     </body>
 </html>

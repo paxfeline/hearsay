@@ -5,6 +5,9 @@
             self.num = 0;
             self.slot("slot", "You have clicked 0 times!");
 
+            // timer gives you 5 seconds to click,
+            // after which it changes the subheading
+            // and sets self.timer to null
             self.timer = setTimeout( () =>
             {
                 self.slot("subheading", "That's all!")
@@ -15,7 +18,9 @@
         },
         react: (self, data, recipient) =>
         {
-            if (self.timer && data == "inc" && self.key == recipient)
+            // listens for 'inc' msgs sent to the appropriate recipient
+            // as long as self.timer is not null
+            if (self.timer !== null && data == "inc" && self.key == recipient)
             {
                 self.num++;
                 self.slot("slot", "You have clicked ", self.num, self.num == 1 ? " time" : " times");
@@ -29,7 +34,7 @@
 </h1>
 <div>
     <h3>
-        <slot name="subheading"></slot>
+        <slot name="subheading">Click fast!</slot>
     </h3>
     <slot></slot>
 </div>
