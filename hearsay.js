@@ -138,7 +138,7 @@ class HearSayJS extends HTMLElement {
     {
         super();
         const root = this.attachShadow({mode: "open"});
-        const cont = document.createElement("div");
+        const cont = document.createElement("span");
         cont.id = "content";
         root.append(cont);
         this.cont = cont;
