@@ -11,7 +11,7 @@ function setup(opts)
 
 Hearsay.setup = setup.bind(Hearsay);
 
-class DataConsumer extends HTMLElement {
+class HearSay extends HTMLElement {
     constructor()
     {
         super();
@@ -43,12 +43,17 @@ class DataConsumer extends HTMLElement {
                 }
     
                 // add "component" property to all children of shadrow root
-                const addComponentAttribute = (el) =>
+                const addComponentAttribute = (el, skip_root) =>
                 {
-                    el.component = this;
+                    //console.log(el);
+                    skip_root || (el.component = this);
                     Array.from(el.children || []).forEach(rel => addComponentAttribute(rel));
                 }
                 addComponentAttribute(this.shadowRoot);
+                
+                // get j-s elements from regular DOM
+                const hsjs = this.querySelectorAll("j-s");
+                addComponentAttribute({children: hsjs}, true);
     
                 // revert elements
                 Hearsay.elements = Hearsay.elements.previous;
@@ -126,18 +131,43 @@ class DataConsumer extends HTMLElement {
     static observedAttributes = ["props", "key"];
 }
 
-customElements.define("data-consumer", DataConsumer);
+customElements.define("hear-say", HearSay);
+
+class HearSayJS extends HTMLElement {
+    constructor()
+    {
+        super();
+        const root = this.attachShadow({mode: "open"});
+        const cont = document.createElement("div");
+        cont.id = "content";
+        root.append(cont);
+        this.cont = cont;
+    }
+    
+    connectedCallback()
+    {
+        setTimeout( () => this.run() );
+    }
+    
+    run()
+    {
+        console.log("run", this.textContent);
+        this.cont.innerHTML = Function("self", `return ${this.textContent}`)(this);
+    }
+}
+
+customElements.define("j-s", HearSayJS);
 
 function broadcast(data, recipient)
 {
     // data-consumer elements
-    const allConsumerElements = document.querySelectorAll("data-consumer");
+    const allConsumerElements = document.querySelectorAll("hear-say");
     allConsumerElements.forEach( consumer => consumer.react(consumer, data, recipient) );
     
     // elements with data-consumer attribute
     const allConsumerCallbacks = document.querySelectorAll("[data-consumer]");
     allConsumerCallbacks.forEach( consumer =>
-        Function("consumer, data, recipient", consumer.dataset.consumer)(consumer, data, recipient) );
+        Function("self, data, recipient", consumer.dataset.consumer)(consumer, data, recipient) );
 }
 
 Hearsay.broadcast = broadcast.bind(Hearsay);
