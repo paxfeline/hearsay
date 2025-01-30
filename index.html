@@ -3,21 +3,11 @@
         <script src="hearsay.js"></script>
     </head>
     <body>
-        <data-consumer struct="clicker.html" key="1"></data-consumer>
+        <data-consumer struct="clicker.html" key="1">
+            <span slot="subheading">Click while you can!</span>
+        </data-consumer>
         <data-consumer struct="clicker.html" key="2">
             <span slot="title">Click'im</span>
         </data-consumer>
-        <div>
-            <div
-                style="display: inline-block;"
-                onclick="broadcast('clicked', 'self')"
-                data-consumer="
-                    consumer.innerHTML += `${data}, ${recipients}<br>`;
-                ">
-                <div style="border: 1em solid black">
-                    Click Here
-                </div>
-            </div>
-        </div>
     </body>
 </html>

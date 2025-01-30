@@ -9,6 +9,17 @@ The use of fetch to retrieve the HTML file means that you have to run a local HT
 
 ---
 
+### Motivation
+
+I have the following goals for Hearsay:
+
+- Good, easy system for web components
+- Easy to incorporate with vanilla JavaScript projects
+- Very lightweight
+- Simple design
+
+---
+
 ### `data-consumer` element
 
 ##### Required attribute:
@@ -43,13 +54,13 @@ You can add a `data-consumer` attribute to any HTML element. The value is interp
   Parameters:
 
   - data: Whatever.
-  - recipients: Whatever. Good choice is adding and using a `key` attribute to the component. See example below.
+  - recipient: Whatever. Good choice is adding and using a `key` attribute to the component. See example below.
 
 ---
 
-### HTML-fragment struct files
+### Component (struct) files
 
-The contents of these files are fetched and attached as the shadow root of the `data-consumer` element.
+The contents of these HTML files are fetched and attached as the shadow root of the `data-consumer` element.
 
 - `script`:
 
@@ -68,23 +79,27 @@ The contents of these files are fetched and attached as the shadow root of the `
 
       Hearsay will call this immediately.
 
+      Parameter:
+
+      - self: The component or element being initialized.
+
     - react
 
       Respond to a message that's been broadcast.
 
       Parameters:
 
-      - consumer: The component or element receiving the message.
+      - self: The component or element receiving the message.
       - data
-      - recipients
+      - recipient
 
       The consumer is passed as a parameter rather than by binding `this` so that developers can use arrow functions.
 
-      The `data` and `recipients` parameters are determined entirely by what is passed to `broadcast`.
+      The `data` and `recipient` parameters are determined entirely by what is passed to `broadcast`.
     
     #### user functions:
 
-    - You can include other functions.
+    - You can include other functions that will be added to the component and available through the `self` parameter.
 
 - slots
 
@@ -127,7 +142,7 @@ clicker.html
             self.num = 0;
             self.slot("slot", self.num);
         },
-        react: (self, data, recipients) =>
+        react: (self, data, recipient) =>
         {
             if (data == "inc")
             {
@@ -173,9 +188,9 @@ clicker.html
             self.num = 0;
             self.slot("slot", self.num);
         },
-        react: (self, data, recipients) =>
+        react: (self, data, recipient) =>
         {
-            if (data == "inc" && self.key == recipients)
+            if (data == "inc" && self.key == recipient)
             {
                 self.num++;
                 self.slot("slot", self.num);
@@ -221,9 +236,9 @@ clicker.html
             self.num = 0;
             self.slot("slot", self.num);
         },
-        react: (self, data, recipients) =>
+        react: (self, data, recipient) =>
         {
-            if (data == "inc" && self.key == recipients)
+            if (data == "inc" && self.key == recipient)
             {
                 self.num++;
                 self.slot("slot", self.num);
@@ -257,7 +272,7 @@ index.html
                 style="display: inline-block;"
                 onclick="broadcast('clicked', 'self')"
                 data-consumer="
-                    consumer.innerHTML += `${data}, ${recipients}<br>`;
+                    consumer.innerHTML += `${data}, ${recipient}<br>`;
                 ">
                 <div style="border: 1em solid black">
                     Click Here

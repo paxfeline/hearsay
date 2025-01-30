@@ -3,23 +3,35 @@
         init: self =>
         {
             self.num = 0;
-            self.slot("slot", self.num);
+            self.slot("slot", "You have clicked 0 times!");
+
+            self.timer = setTimeout( () =>
+            {
+                self.slot("subheading", "That's all!")
+                if (self.num == 0) self.slot("slot", "Do better next time.")
+                self.timer = null;
+            },
+            5000)
         },
-        react: (self, data, recipients) =>
+        react: (self, data, recipient) =>
         {
-            if (data == "inc" && self.key == recipients)
+            if (self.timer && data == "inc" && self.key == recipient)
             {
                 self.num++;
-                self.slot("slot", self.num);
+                self.slot("slot", "You have clicked ", self.num, self.num == 1 ? " time" : " times");
             }
         },
     });
 </script>
-<h1><slot name="title">Clicker</slot></h1>
+
+<h1>
+    <slot name="title">Clicker</slot>
+</h1>
 <div>
-    You have clicked
+    <h3>
+        <slot name="subheading"></slot>
+    </h3>
     <slot></slot>
-    times!
 </div>
 
 <button onclick="broadcast('inc', this.component.key)">

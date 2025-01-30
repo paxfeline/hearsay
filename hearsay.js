@@ -62,8 +62,6 @@ class DataConsumer extends HTMLElement {
 
     slot(name, ...data)
     {
-        console.log(data);
-        
         // if the default slot is replaced, first save all named slots
         // replace everything, and put back named slots
         if (name == "slot")
@@ -74,12 +72,25 @@ class DataConsumer extends HTMLElement {
                 ...slots
             );
         }
-        // if named slot, just replace its children
+        // if element filling slot exists, just replace its children
         else
         {
-            this.querySelector(`[slot="${name}"]`).replaceChildren(
-                ...data.map( el => el.nodeType ? el : document.createTextNode(el) )
-            );
+            const slot = this.querySelector(`[slot="${name}"]`);
+            const nodes = data.map( el => el.nodeType ? el : document.createTextNode(el) );
+            
+            // if one exists, replace its children
+            if (slot)
+            {
+                slot.replaceChildren( ...nodes );
+            }
+            // otherwise create element to fill slot
+            else
+            {
+                const span = document.createElement("span");
+                span.setAttribute("slot", name);
+                span.append( ...nodes );
+                this.append(span);
+            }
         }
     }
     
@@ -117,21 +128,19 @@ class DataConsumer extends HTMLElement {
 
 customElements.define("data-consumer", DataConsumer);
 
-function broadcast(data, recipients)
+function broadcast(data, recipient)
 {
     // data-consumer elements
     const allConsumerElements = document.querySelectorAll("data-consumer");
-    allConsumerElements.forEach( consumer => consumer.react(consumer, data, recipients) );
+    allConsumerElements.forEach( consumer => consumer.react(consumer, data, recipient) );
     
     // elements with data-consumer attribute
     const allConsumerCallbacks = document.querySelectorAll("[data-consumer]");
     allConsumerCallbacks.forEach( consumer =>
-        Function("consumer, data, recipients",
-        consumer.dataset.consumer)
-        (consumer, data, recipients) );
+        Function("consumer, data, recipient", consumer.dataset.consumer)(consumer, data, recipient) );
 }
 
-Hearsay.broadcast = broadcast.bind(Hearsay);;
+Hearsay.broadcast = broadcast.bind(Hearsay);
 
 // copy all Hearsay methods (init, broadcast) to global scope
 Object.assign(window, Hearsay);
