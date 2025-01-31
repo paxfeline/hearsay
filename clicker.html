@@ -4,12 +4,21 @@
         {
             self.num = 0;
             self.slot("slot", "You have clicked 0 times!");
+
+            self.timer = setTimeout(
+                () =>
+                {
+                    self.slot("subheading", "Time's up!");
+                    self.timer = null;
+                },
+                5000
+            )
         },
         react: (self, data, recipient) =>
         {
             // listens for 'inc' msgs sent to the appropriate recipient
             // as long as self.timer is not null
-            if (data == "inc" && self.key == recipient)
+            if (self.timer !== null && data == "inc" && self.key == recipient)
             {
                 self.num++;
                 self.slot("slot", "You have clicked ", self.num, self.num == 1 ? " time" : " times");

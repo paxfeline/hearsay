@@ -185,7 +185,7 @@ function broadcast(data, recipient)
 {
     // data-consumer elements
     const allConsumerElements = document.querySelectorAll("hear-say");
-    allConsumerElements.forEach( consumer => consumer?.react(consumer, data, recipient) );
+    allConsumerElements.forEach( consumer => consumer.react?.(consumer, data, recipient) );
     
     // elements with data-consumer attribute
     const allConsumerCallbacks = document.querySelectorAll("[data-consumer]");
