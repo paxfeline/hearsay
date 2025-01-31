@@ -1,7 +1,7 @@
-# Hearsay
+# Hear-Say
 ## simple web components
 
-Hearsay is a very simple framework for creating web components that can broadcast and receive messages. A [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) `data-consumer` is defined, and uses the `struct` attribute to specify the URL of an HTML file to be used to create the custom element's [shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
+Hear-Say is a very simple framework for creating web components that can broadcast and receive messages. A [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) `hear-say` is defined, and uses the `src` attribute to specify the URL of an HTML file to be used to create the custom element's [shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
 
 Knowledge of custom elements will be helpful; at least until I figure out how to document everything better.
 
@@ -11,20 +11,22 @@ The use of fetch to retrieve the HTML file means that you have to run a local HT
 
 ### Motivation
 
-I have the following goals for Hearsay:
+I have the following goals for Hear-Say:
 
 - Good, easy system for web components
 - Easy to incorporate with vanilla JavaScript projects
 - Very lightweight
 - Simple design
+  ...
+- Cutsey name
 
 ---
 
-### `data-consumer` element
+### `<hear-say>` element
 
 ##### Required attribute:
 
-- struct: URL of an HTML file to be used to generate the component's shadow DOM.
+- src: URL of an HTML file to be used to generate the component's shadow DOM.
 
 ##### Optional attributes:
 
@@ -60,7 +62,7 @@ You can add a `data-consumer` attribute to any HTML element. The value is interp
 
 ### Component (struct) files
 
-The contents of these HTML files are fetched and attached as the shadow root of the `data-consumer` element.
+The contents of these HTML files are fetched and attached as the shadow root of the `<hear-say>` element.
 
 - `script`:
 
@@ -68,16 +70,16 @@ The contents of these HTML files are fetched and attached as the shadow root of 
 
     #### [Custom element lifecycle callbacks](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements#custom_element_lifecycle_callbacks):
 
-    - customConnectedCallback
-    - disconnectedCallback
-    - adoptedCallback
-    - attributeChangedCallback
+    - connected
+    - disconnected
+    - adopted
+    - attributeChanged
 
-    #### hearsay functions:
+    #### hear-say functions:
 
     - init
 
-      Hearsay will call this immediately.
+      Hear-Say will call this immediately.
 
       Parameter:
 
@@ -103,7 +105,7 @@ The contents of these HTML files are fetched and attached as the shadow root of 
 
 - slots
 
-  You can include slots in your HTML file, either named or unnamed. Hearsay components have a `slot` function that can be used to quickly set the content of these slots.
+  You can include slots in your HTML file, either named or unnamed. Hear-Say components have a `slot` function that can be used to quickly set the content of these slots.
 
   Parameters:
 
@@ -119,7 +121,7 @@ The contents of these HTML files are fetched and attached as the shadow root of 
 
 ### The Simplest Example:
 
-This example uses the `data-consumer` element to create a `clicker` component. The component uses `init` to set up an initial state, and `react` to respond to the "inc" message.
+This example uses the `hear-say` element to create a `clicker` component. The component uses `init` to set up an initial state, and `react` to respond to the "inc" message.
 
 index.html
 ```html
@@ -128,7 +130,7 @@ index.html
         <script src="hearsay.js"></script>
     </head>
     <body>
-        <data-consumer struct="clicker.html"></data-consumer>
+        <hear-say struct="clicker.html"></hear-say>
     </body>
 </html>
 ```
@@ -173,8 +175,8 @@ index.html
         <script src="hearsay.js"></script>
     </head>
     <body>
-        <data-consumer struct="clicker.html" key="1"></data-consumer>
-        <data-consumer struct="clicker.html" key="2"></data-consumer>
+        <hear-say struct="clicker.html" key="1"></hear-say>
+        <hear-say struct="clicker.html" key="2"></hear-say>
     </body>
 </html>
 ```
@@ -219,10 +221,10 @@ index.html
         <script src="hearsay.js"></script>
     </head>
     <body>
-        <data-consumer struct="clicker.html" key="1"></data-consumer>
-        <data-consumer struct="clicker.html" key="2">
+        <hear-say struct="clicker.html" key="1"></hear-say>
+        <hear-say struct="clicker.html" key="2">
             <span slot="title">Click'im</span>
-        </data-consumer>
+        </hear-say>
     </body>
 </html>
 ```

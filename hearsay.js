@@ -1,4 +1,4 @@
-window.Hearsay = {}
+window.hearsay = {}
 
 function setup(opts)
 {
@@ -9,9 +9,10 @@ function setup(opts)
     opts.init?.(this.elements.current);
 }
 
-Hearsay.setup = setup.bind(Hearsay);
+hearsay.setup = setup.bind(hearsay);
 
-class HearSay extends HTMLElement {
+class HearSay extends HTMLElement
+{
     constructor()
     {
         super();
@@ -29,7 +30,7 @@ class HearSay extends HTMLElement {
             .then( () =>
             {
                 // keep track of the element currently being inited
-                Hearsay.elements = {current: this, previous: Hearsay.elements?.current};
+                hearsay.elements = {current: this, previous: hearsay.elements?.current};
     
                 // if a script is present, it's not run by default.
                 // create a new script element, copy the code,
@@ -42,25 +43,47 @@ class HearSay extends HTMLElement {
                     oldScript.replaceWith(newScript);
                 }
     
-                // add "component" property to all children of shadrow root
+                // add "component" property to all children of regular and shadrow root
                 const addComponentAttribute = (el, skip_root) =>
                 {
                     //console.log(el);
                     skip_root || (el.component = this);
                     Array.from(el.children || []).forEach(rel => addComponentAttribute(rel));
                 }
+                addComponentAttribute(this, true);
                 addComponentAttribute(this.shadowRoot);
                 
-                // get j-s elements from regular DOM
-                const hsjs = this.querySelectorAll("j-s");
-                addComponentAttribute({children: hsjs}, true);
+                // get j-s elements from regular and shadow DOM
+                const hsregjs = this.querySelectorAll("j-s");
+                addComponentAttribute({children: hsregjs}, true);
+                const hsshajs = this.shadowRoot.querySelectorAll("j-s");
+                addComponentAttribute({children: hsshajs}, true);
     
                 // revert elements
-                Hearsay.elements = Hearsay.elements.previous;
+                hearsay.elements = hearsay.elements.previous;
             } )
         }
 
-        this.customConnectedCallback?.();
+        this.connected?.();
+    }
+
+    // other custom element lifecycle callbacks:
+    
+    //disconnected
+    //adopted
+    
+    attributeChangedCallback()
+    {
+        // if the props attribute changes,
+        // j-s elements in this component should be recalculateds
+
+        const hsregjs = this.querySelectorAll("j-s");
+        const hsshajs = this.shadowRoot?.querySelectorAll("j-s") || [];
+
+        const alljs = Array.from(hsregjs).concat(Array.from(hsshajs));
+        alljs.forEach( js => js.run() );
+
+        this.attributeChanged?.();
     }
 
     /* util functions */
@@ -104,28 +127,27 @@ class HearSay extends HTMLElement {
 
     get props()
     {
+        const prop_att = this.getAttribute("props")?.trim() || "{}";
         if (!this._props)
-            this.props = this.getAttribute("props");
-        return this._props?.();
+            this._props = Function(`try { return ${prop_att}; } catch { return "${prop_att}"; }`);
+        return this._props();
     }
 
     set props(val)
     {
         this.setAttribute("props", val);
-        this._props = Function(`try { return ${val}; } catch { return "${val}"; }`);
     }
     
     get key()
     {
-        if (!this._key)
-            this.key = this.getAttribute("key");
-        return this._key?.();
+        return this._key?.() || this.getAttribute("key");
     }
 
     set key(val)
     {
         this.setAttribute("key", val);
-        this._key = Function(`try { return ${val}; } catch { return "${val}"; }`);
+        const tval = val.trim();
+        this._key = Function(`try { return ${tval}; } catch { return "${tval}"; }`);
     }
 
     static observedAttributes = ["props", "key"];
@@ -133,7 +155,8 @@ class HearSay extends HTMLElement {
 
 customElements.define("hear-say", HearSay);
 
-class HearSayJS extends HTMLElement {
+class HearSayJS extends HTMLElement
+{
     constructor()
     {
         super();
@@ -152,7 +175,7 @@ class HearSayJS extends HTMLElement {
     run()
     {
         console.log("run", this.textContent);
-        this.cont.innerHTML = Function("self", `return ${this.textContent}`)(this);
+        this.cont.innerHTML = Function("self", `return ${this.textContent.trim()}`)(this);
     }
 }
 
@@ -162,7 +185,7 @@ function broadcast(data, recipient)
 {
     // data-consumer elements
     const allConsumerElements = document.querySelectorAll("hear-say");
-    allConsumerElements.forEach( consumer => consumer.react(consumer, data, recipient) );
+    allConsumerElements.forEach( consumer => consumer?.react(consumer, data, recipient) );
     
     // elements with data-consumer attribute
     const allConsumerCallbacks = document.querySelectorAll("[data-consumer]");
@@ -170,7 +193,7 @@ function broadcast(data, recipient)
         Function("self, data, recipient", consumer.dataset.consumer)(consumer, data, recipient) );
 }
 
-Hearsay.broadcast = broadcast.bind(Hearsay);
+hearsay.broadcast = broadcast.bind(hearsay);
 
-// copy all Hearsay methods (init, broadcast) to global scope
-Object.assign(window, Hearsay);
+// copy all hearsay methods (init, broadcast) to global scope
+Object.assign(window, hearsay);
