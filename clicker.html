@@ -4,33 +4,28 @@
         {
             self.num = 0;
             self.slot("slot", "You have clicked 0 times!");
-
-            // timer gives you 5 seconds to click,
-            // after which it changes the subheading
-            // and sets self.timer to null
-            self.timer = setTimeout( () =>
-            {
-                self.slot("subheading", "That's all!")
-                if (self.num == 0) self.slot("slot", "Do better next time.")
-                self.timer = null;
-            },
-            5000)
         },
         react: (self, data, recipient) =>
         {
             // listens for 'inc' msgs sent to the appropriate recipient
             // as long as self.timer is not null
-            if (self.timer !== null && data == "inc" && self.key == recipient)
+            if (data == "inc" && self.key == recipient)
             {
                 self.num++;
                 self.slot("slot", "You have clicked ", self.num, self.num == 1 ? " time" : " times");
+                console.log(self.props);
+                self.props = { ...self.props, foo: Math.random() * 100 };
             }
         },
     });
 </script>
 
 <h1>
-    <slot name="title">Clicker</slot>
+    <slot name="title">
+        <j-s>
+            self.component.props?.foo || "Clicker"
+        </j-s>
+    </slot>
 </h1>
 <div>
     <h3>

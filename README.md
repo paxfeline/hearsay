@@ -17,12 +17,12 @@ I have the following goals for Hear-Say:
 - Easy to incorporate with vanilla JavaScript projects
 - Very lightweight
 - Simple design
-...
+  ...
 - Cutsey name
 
 ---
 
-### `hear-say` element
+### `<hear-say>` element
 
 ##### Required attribute:
 
@@ -62,7 +62,7 @@ You can add a `data-consumer` attribute to any HTML element. The value is interp
 
 ### Component (struct) files
 
-The contents of these HTML files are fetched and attached as the shadow root of the `hear-say` element.
+The contents of these HTML files are fetched and attached as the shadow root of the `<hear-say>` element.
 
 - `script`:
 
@@ -70,10 +70,10 @@ The contents of these HTML files are fetched and attached as the shadow root of 
 
     #### [Custom element lifecycle callbacks](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements#custom_element_lifecycle_callbacks):
 
-    - customConnectedCallback
-    - disconnectedCallback
-    - adoptedCallback
-    - attributeChangedCallback
+    - connected
+    - disconnected
+    - adopted
+    - attributeChanged
 
     #### hear-say functions:
 
