@@ -15,7 +15,7 @@ I don't like:
 
 ### First: Simple Web Components
 
-The idea here is to make a single [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) that acts as a shell user-defined Web Components. (In the following, "custom element," and "[web] component" may be used interchangably.)
+The idea here is to make a single [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) that acts as a shell user-defined Web Components. (In the following, "custom element," and "[web] component" may be used interchangeably.)
 
 The Hear-Say custom element class has some basic methods defined. All custom elements can define the following callbacks (as explained at the above link):
 
@@ -32,7 +32,7 @@ The Hear-Say component class uses the connectedCallback to load the component's 
 
 A component's shadow DOM is what the user will actually see rendered. A component's look and content can be defined entirely in the component's source HTML file.
 
-**Technical Note**: A `<script>` element can be included in the source HTML file. This is where a component can call the `setup()` method, for example. When HTML is fetched and then inserted into the DOM, such `<script>` elements are ignored, for security reasons one assumes. To get around this, Hear-Say creates a new `<script>` element, copies the code from the old one into the new one, and then replaces the old one with the new one. The new, operational `<script>` element runs its code as soon as its inserted into the DOM.
+**Technical Note**: A `<script>` element can be included in the source HTML file. This is where a component can call the `setup()` method, for example. When HTML is fetched and then inserted into the DOM, such `<script>` elements are ignored, for security reasons one assumes. To get around this, Hear-Say creates a new `<script>` element, copies the code from the old one into the new one, and then replaces the old one with the new one. The new, operational `<script>` element runs its code as soon as it's inserted into the DOM.
 
 In the included `<script>` element, you can call Hear-Say's `setup()` method. (Hear-Say keeps track of which element is being initialized during this process.) This method takes a single object as an argument, and does two things:
 1. Copies the fields from the passed object into the Component.
@@ -59,7 +59,7 @@ The first parameter is used instead of relying on binding `this`, mainly because
 
 #### props
 
-One thing I don't hate about React is the way you can supply data to a component through "props." The Hear-Say version of this is to include a `props` attribute for a component, if desired. Like all HTML attributes (including ones that are interpretted as JavaScript code), they are stored as strings. One convenience Hear-Say provides is a special getter method for `props`.
+One thing I don't hate about React is the way you can supply data to a component through "props." The Hear-Say version of this is to include a `props` attribute for a component, if desired. Like all HTML attributes (including ones that are interpreted as JavaScript code), they are stored as strings. One convenience Hear-Say provides is a special getter method for `props`.
 
 This is what it looks like:
 
@@ -82,7 +82,7 @@ So say you had this HTML code:
 </hear-say>
 ```
 
-Hear-Say extacts the text from the `props` attribute and inserts it into a function with this code:
+Hear-Say extracts the text from the `props` attribute and inserts it into a function with this code:
 
 ```javascript
 try
@@ -112,7 +112,7 @@ catch
 }
 ```
 
-If you wanted to output a string that would otherwise be interpretted as code, you can fall back to a second set of quotation marks:
+If you wanted to output a string that would otherwise be interpreted as code, you can fall back to a second set of quotation marks:
 
 ```html
 <hear-say src="clicker.html" props="'alert(42)'"></hear-say>
@@ -120,7 +120,7 @@ If you wanted to output a string that would otherwise be interpretted as code, y
 
 ### First Corollary
 
-It's a pretty straightforward extention of the ideas above to allow any HTML element to respond to broadcasts. To enable this, Hear-Say has the `broadcast` function also send messages to elements with a `data-consumer` attribute. This attribute should contain code for a function with the parameters `self`, `data`, and `recipient` (same as the `react` method described above). The `self` parameter will reference the HTML element recieving the message.
+It's a pretty straightforward extension of the ideas above to allow any HTML element to respond to broadcasts. To enable this, Hear-Say has the `broadcast` function also send messages to elements with a `data-consumer` attribute. This attribute should contain code for a function with the parameters `self`, `data`, and `recipient` (same as the `react` method described above). The `self` parameter will reference the HTML element receiving the message.
 
 ### Second: Inline JavaScript
 
@@ -152,7 +152,7 @@ Here is how the equivalent Hear-Say component source HTML file would look.
 </h1>
 ```
 
-Currently the code inside a `<j-s>` element behaves like a function with a single parameter, `self`. This will likely be expanded to also recieve `component` and `props` directly (if they exist -- the element could also be used outside of a component).
+Currently the code inside a `<j-s>` element behaves like a function with a single parameter, `self`. This will likely be expanded to also receive `component` and `props` directly (if they exist -- the element could also be used outside of a component).
 
 ### Ongoing Work
 
