@@ -11,8 +11,17 @@
 <link rel="stylesheet" href="simple.css">
 
 <h1>
-    <j-s> self.component.props?.title </j-s>
+    <slot name="title">
+        <j-s>
+            self.component.props?.title
+        </j-s>
+    </slot>
 </h1>
 <h2>
-    <j-s> self.component.props?.foo </j-s>
+    <slot name="subtitle">
+        <j-s> self.component.props?.subtitle || "" </j-s>
+    </slot>
 </h2>
+<div>
+    <slot></slot>
+</div>
