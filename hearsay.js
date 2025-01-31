@@ -127,6 +127,12 @@ class HearSay extends HTMLElement
 
     get props()
     {
+        // TODO: document: add lit-props attribute
+        // to specify a string literal as the value of props.
+        // this avoids errors that would be caused by
+        // the string being interpretted as javascript (below).
+        if (this.hasAttribute("lit-props")) return this.getAttribute("props");
+
         const prop_att = this.getAttribute("props")?.trim() || "{}";
         const prop_func = Function(`try { return ${prop_att}; } catch { return ${JSON.stringify(prop_att)}; }`);
         return prop_func();
@@ -139,6 +145,10 @@ class HearSay extends HTMLElement
 
     get key()
     {
+        // TODO: document: add lit-key attribute
+        // to specify a string literal as the value of key
+        if (this.hasAttribute("lit-key")) return this.getAttribute("key");
+
         const prop_att = this.getAttribute("key")?.trim() || "null";
         const prop_func = Function(`try { return ${prop_att}; } catch { return ${JSON.stringify(prop_att)}; }`);
         return prop_func();
