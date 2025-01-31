@@ -57,6 +57,20 @@ If you want your component to be able to respond to messages that are broadcast,
 
 The first parameter is used instead of relying on binding `this`, mainly because arrow functions are so popular. The second two parameters are determined purely by the call to `broadcast`.
 
+#### slots
+
+Because they are custom elements, Hear-Say components can have [slots](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_templates_and_slots#adding_flexibility_with_slots). Slots are useful for cases where you want to be able to place child-elements to be rendered somewhere inside your component.
+
+A custom element is not obliged to display its children. However, if you would like it to, you can include an unnamed `<slot>` element in the component's HTML source. All children of the component will be rendered in this slot -- with the following exception:
+
+If a top-level child of your component has a `slot` attribute that matches the `name` attribute of a `<slot>` element in your component's source (i.e. it's shadow DOM), it will be rendered in that slot.
+
+Slots can also have default content, in case the component has no (matching) child elements.
+
+Hear-Say components have a `slot()` method that can be used to programatically fill slots. It takes the following parameters:
+- slot: "slot" for the default slot, or a slot's `name`.
+- ...string_or_node: a variable number of either nodes (may be none), or strings (which are inserted as Text nodes), to place into the specified slot. Any content that was there is replaced.
+
 #### props
 
 One thing I don't hate about React is the way you can supply data to a component through "props." The Hear-Say version of this is to include a `props` attribute for a component, if desired. Like all HTML attributes (including ones that are interpreted as JavaScript code), they are stored as strings. One convenience Hear-Say provides is a special getter method for `props`.
