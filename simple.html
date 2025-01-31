@@ -1,3 +1,16 @@
+<script>
+    setup({
+        react: (self, data, recipient) =>
+        {
+                console.log(self.props);
+                self.props = { ...self.props, foo: Math.random() * 100 };
+        },
+    });
+</script>
+
 <h1>
     <j-s> self.component.props?.title </j-s>
 </h1>
+<h2>
+    <j-s> self.component.props?.foo </j-s>
+</h2>

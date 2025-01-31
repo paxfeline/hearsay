@@ -22,8 +22,6 @@
             {
                 self.num++;
                 self.slot("slot", "You have clicked ", self.num, self.num == 1 ? " time" : " times");
-                console.log(self.props);
-                self.props = { ...self.props, foo: Math.random() * 100 };
             }
         },
     });

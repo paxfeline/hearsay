@@ -128,26 +128,25 @@ class HearSay extends HTMLElement
     get props()
     {
         const prop_att = this.getAttribute("props")?.trim() || "{}";
-        if (!this._props)
-            this._props = Function(`try { return ${prop_att}; } catch { return "${prop_att}"; }`);
-        return this._props();
+        const prop_func = Function(`try { return ${prop_att}; } catch { return ${JSON.stringify(prop_att)}; }`);
+        return prop_func();
     }
 
     set props(val)
     {
-        this.setAttribute("props", val);
+        this.setAttribute("props", typeof val == "object" ? JSON.stringify(val) : val);
     }
-    
+
     get key()
     {
-        return this._key?.() || this.getAttribute("key");
+        const prop_att = this.getAttribute("key")?.trim() || "null";
+        const prop_func = Function(`try { return ${prop_att}; } catch { return ${JSON.stringify(prop_att)}; }`);
+        return prop_func();
     }
 
     set key(val)
     {
-        this.setAttribute("key", val);
-        const tval = val.trim();
-        this._key = Function(`try { return ${tval}; } catch { return "${tval}"; }`);
+        this.setAttribute("key", typeof val == "object" ? JSON.stringify(val) : val);
     }
 
     static observedAttributes = ["props", "key"];

@@ -67,7 +67,7 @@ If a top-level child of your component has a `slot` attribute that matches the `
 
 Slots can also have default content, in case the component has no (matching) child elements.
 
-Hear-Say components have a `slot()` method that can be used to programatically fill slots. It takes the following parameters:
+Hear-Say components have a `slot()` method that can be used to programmatically fill slots. It takes the following parameters:
 - slot: "slot" for the default slot, or a slot's `name`.
 - ...string_or_node: a variable number of either nodes (may be none), or strings (which are inserted as Text nodes), to place into the specified slot. Any content that was there is replaced.
 
@@ -82,7 +82,7 @@ get props()
 {
     const prop_att = this.getAttribute("props")?.trim() || "{}";
     if (!this._props)
-        this._props = Function(`try { return ${prop_att}; } catch { return "${prop_att}"; }`);
+        this._props = Function(`try { return ${prop_att}; } catch { return ${JSON.stringify(prop_att)}; }`);
     return this._props();
 }
 ```
@@ -105,7 +105,7 @@ try
 }
 catch
 {
-    return "{title: 'titular item'}";
+    return return ${JSON.stringify("{title: 'titular item'}")};
 }
 ```
 
@@ -122,7 +122,7 @@ try
 }
 catch
 {
-    return "this is a test";
+    return return ${JSON.stringify("this is a test")};
 }
 ```
 
@@ -131,6 +131,8 @@ If you wanted to output a string that would otherwise be interpreted as code, yo
 ```html
 <hear-say src="clicker.html" props="'alert(42)'"></hear-say>
 ```
+
+**Technical Note**: I found that using setAttribute, HTML entities are encoded; in particular, quotation marks. That is, while calling `setAttribute("props", '"foo": "bar"')` results in the DOM looking like `props="&quot;foo&quot;: &quot;bar&quot;"`. This would be tedious to write by hand, but it's valid, and `getAttribute()` converts the HTML entities back into their actual characters (i.e. quotation marks, inside the prop_att string). This broke my initial approach, which was to `return "${prop_att}";` in the `catch` block. Using `JSON.stringigy()` is more robust.
 
 ### First Corollary
 
