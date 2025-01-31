@@ -1,7 +1,7 @@
-# Hear-Say
+# hearsay
 ## simple web components
 
-Hear-Say is a very simple framework for creating web components that can broadcast and receive messages. A [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) `hear-say` is defined, and uses the `src` attribute to specify the URL of an HTML file to be used to create the custom element's [shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
+hearsay is a very simple framework for creating web components that can broadcast and receive messages. A [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) `hear-say` is defined, and uses the `src` attribute to specify the URL of an HTML file to be used to create the custom element's [shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
 
 Knowledge of custom elements will be helpful; at least until I figure out how to document everything better.
 
@@ -11,7 +11,7 @@ The use of fetch to retrieve the HTML file means that you have to run a local HT
 
 ### Motivation
 
-I have the following goals for Hear-Say:
+I have the following goals for hearsay:
 
 - Good, easy system for web components
 - Easy to incorporate with vanilla JavaScript projects
@@ -79,7 +79,7 @@ The contents of these HTML files are fetched and attached as the shadow root of 
 
     - init
 
-      Hear-Say will call this immediately.
+      hearsay will call this immediately.
 
       Parameter:
 
@@ -105,7 +105,7 @@ The contents of these HTML files are fetched and attached as the shadow root of 
 
 - slots
 
-  You can include slots in your HTML file, either named or unnamed. Hear-Say components have a `slot` function that can be used to quickly set the content of these slots.
+  You can include slots in your HTML file, either named or unnamed. hearsay components have a `slot` function that can be used to quickly set the content of these slots.
 
   Parameters:
 

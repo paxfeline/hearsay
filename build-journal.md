@@ -1,4 +1,4 @@
-# Hear-Say
+# **hearsay**
 ## Talkative Web Components
 ## *Build Journal*
 
@@ -15,30 +15,32 @@ I don't like:
 
 ### First: Simple Web Components
 
-The idea here is to make a single [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) that acts as a shell user-defined Web Components. (In the following, "custom element," and "[web] component" may be used interchangeably.)
+The idea here is to make a single [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) that acts as a shell for user-defined Web Components. (In the following, "custom element," and "[hearsay] component" may be used interchangeably.)
 
-The Hear-Say custom element class has some basic methods defined. All custom elements can define the following callbacks (as explained at the above link):
+The hearsay custom element class has some basic methods defined. All custom elements can define the following callbacks (as explained at the above link):
 
 - connectedCallback
 - disconnectedCallback
 - adoptedCallback
 - attributeChangedCallback
 
-Hear-Say components can also use these callbacks via the `setup()` method, explained more below. 
+hearsay components can also use these callbacks via the `setup()` method, explained more below. 
 
 #### connectedCallback
 
-The Hear-Say component class uses the connectedCallback to load the component's source file. The URL to the file is specified in the component's `src` attribute, and points to an HTML file. The Hear-Say class fetches the HTML file, and then attaches its contents as the custom element's "[shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM)."
+The hearsay component class uses the connectedCallback to load the component's source file. The URL to the file is specified in the component's `src` attribute, and points to an HTML file. The hearsay class fetches the HTML file, and then attaches its contents as the custom element's "[shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM)."
+
+**Technical Note**: The use of `fetch()` to retrieve the HTML file means that hearsay requires you to run an HTTP server for local development. Otherwise everything is done client-side. There are some easy ways to run a local HTTP server. The included shell script "server.sh" is one line that uses Python to start an HTTP server in the current working directory. Navigate to the hearsay directory in the Terminal, and then type `./server.sh`.
 
 A component's shadow DOM is what the user will actually see rendered. A component's look and content can be defined entirely in the component's source HTML file.
 
-**Technical Note**: A `<script>` element can be included in the source HTML file. This is where a component can call the `setup()` method, for example. When HTML is fetched and then inserted into the DOM, such `<script>` elements are ignored, for security reasons one assumes. To get around this, Hear-Say creates a new `<script>` element, copies the code from the old one into the new one, and then replaces the old one with the new one. The new, operational `<script>` element runs its code as soon as it's inserted into the DOM.
+**Technical Note**: A `<script>` element can be included in the source HTML file. This is where a component can call the `setup()` method, for example. When HTML is fetched and then inserted into the DOM, such `<script>` elements are ignored, for security reasons one assumes. To get around this, hearsay creates a new `<script>` element, copies the code from the old one into the new one, and then replaces the old one with the new one. The new, operational `<script>` element runs its code as soon as it's inserted into the DOM.
 
-In the included `<script>` element, you can call Hear-Say's `setup()` method. (Hear-Say keeps track of which element is being initialized during this process.) This method takes a single object as an argument, and does two things:
+In the included `<script>` element, you can call hearsay's `setup()` method. (hearsay keeps track of which element is being initialized during this process.) This method takes a single object as an argument, and does two things:
 1. Copies the fields from the passed object into the Component.
 2. Calls an `init()` method, if one was provided.
 
-Lastly, in the connectedCallback method, Hear-Say goes through all the elements in the regular and shadow DOM's and adds a `component` property that references the component it is part of. This is so you could do something like the following inside a component:
+Lastly, in the connectedCallback method, hearsay goes through all the elements in the regular and shadow DOM's and adds a `component` property that references the component it is part of. This is so you could do something like the following inside a component:
 
 ```html
 <button onclick="broadcast('inc', this.component.key)">
@@ -48,7 +50,7 @@ Lastly, in the connectedCallback method, Hear-Say goes through all the elements 
 
 #### broadcast / react
 
-The above example shows a use of the `broadcast` function. This is another key functionality of Hear-Say, and it's also very simple. The `broadcast` function uses `document.querySelectorAll()` to get a list of all `hear-say` elements (Hear-Say components), and invokes their `react` method, if one is present.
+The above example shows a use of the `broadcast` function. This is another key functionality of hearsay, and it's also very simple. The `broadcast` function uses `document.querySelectorAll()` to get a list of all `hear-say` elements (hearsay components), and invokes their `react` method, if one is present.
 
 If you want your component to be able to respond to messages that are broadcast, you include a `react` method in the object when you call `setup()`. The `react` method has three parameters:
 - self: the component
@@ -59,7 +61,7 @@ The first parameter is used instead of relying on binding `this`, mainly because
 
 #### slots
 
-Because they are custom elements, Hear-Say components can have [slots](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_templates_and_slots#adding_flexibility_with_slots). Slots are useful for cases where you want to be able to place child-elements to be rendered somewhere inside your component.
+Because they are custom elements, hearsay components can have [slots](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_templates_and_slots#adding_flexibility_with_slots). Slots are useful for cases where you want to be able to place child-elements to be rendered somewhere inside your component.
 
 A custom element is not obliged to display its children. However, if you would like it to, you can include an unnamed `<slot>` element in the component's HTML source. All children of the component will be rendered in this slot -- with the following exception:
 
@@ -67,13 +69,13 @@ If a top-level child of your component has a `slot` attribute that matches the `
 
 Slots can also have default content, in case the component has no (matching) child elements.
 
-Hear-Say components have a `slot()` method that can be used to programmatically fill slots. It takes the following parameters:
+hearsay components have a `slot()` method that can be used to programmatically fill slots. It takes the following parameters:
 - slot: "slot" for the default slot, or a slot's `name`.
 - ...string_or_node: a variable number of either nodes (may be none), or strings (which are inserted as Text nodes), to place into the specified slot. Any content that was there is replaced.
 
 #### props
 
-One thing I don't hate about React is the way you can supply data to a component through "props." The Hear-Say version of this is to include a `props` attribute for a component, if desired. Like all HTML attributes (including ones that are interpreted as JavaScript code), they are stored as strings. One convenience Hear-Say provides is a special getter method for `props`.
+One thing I don't hate about React is the way you can supply data to a component through "props." The hearsay version of this is to include a `props` attribute for a component, if desired. Like all HTML attributes (including ones that are interpreted as JavaScript code), they are stored as strings. One convenience hearsay provides is a special getter method for `props`.
 
 This is what it looks like:
 
@@ -96,7 +98,7 @@ So say you had this HTML code:
 </hear-say>
 ```
 
-Hear-Say extracts the text from the `props` attribute and inserts it into a function with this code:
+hearsay extracts the text from the `props` attribute and inserts it into a function with this code:
 
 ```javascript
 try
@@ -136,7 +138,7 @@ If you wanted to output a string that would otherwise be interpreted as code, yo
 
 ### First Corollary
 
-It's a pretty straightforward extension of the ideas above to allow any HTML element to respond to broadcasts. To enable this, Hear-Say has the `broadcast` function also send messages to elements with a `data-consumer` attribute. This attribute should contain code for a function with the parameters `self`, `data`, and `recipient` (same as the `react` method described above). The `self` parameter will reference the HTML element receiving the message.
+It's a pretty straightforward extension of the ideas above to allow any HTML element to respond to broadcasts. To enable this, hearsay has the `broadcast` function also send messages to elements with a `data-consumer` attribute. This attribute should contain code for a function with the parameters `self`, `data`, and `recipient` (same as the `react` method described above). The `self` parameter will reference the HTML element receiving the message.
 
 ### Second: Inline JavaScript
 
@@ -156,10 +158,11 @@ function Simple({title})
 
 In JSX, the format used here by React, you can insert JavaScript inside curly braces.
 
-For Hear-Say, I added a second custom element: `<j-s>`. It's not quite the same, because it only allows JavaScript expressions -- not entire blocks of code. (Likely future feature: add a `long` attribute to allow blocks of code.)
+For hearsay, I added a second custom element: `<j-s>`. It's not quite the same, because it only allows JavaScript expressions -- not entire blocks of code. (Likely future feature: add a `long` attribute to allow blocks of code.)
 
-Here is how the equivalent Hear-Say component source HTML file would look.
+Here is how the equivalent hearsay component source HTML file would look.
 
+Simple.html
 ```html
 <h1>
     <j-s>
@@ -172,11 +175,11 @@ Currently the code inside a `<j-s>` element behaves like a function with a singl
 
 ### Ongoing Work
 
-Custom elements can use a callback to observe changes to specified attributes, and so Hear-Say components do for `props`. When this callback is triggered, Hear-Say should make sure all `<j-s>` elements, and the `props` of child components, which may derive from their parents', should be recalculated.
+Custom elements can use a callback to observe changes to specified attributes, and so hearsay components do for `props`. When this callback is triggered, hearsay should make sure all `<j-s>` elements, and the `props` of child components, which may derive from their parents', should be recalculated.
 
 #### Coming: Flow Control
 
-The next custom elements to be added to Hear-Say will likely be:
+The next custom elements to be added to hearsay will likely be:
 
 - `<if-else>`
   for conditionally displaying contents, determined by evaluating `props` (or another attribute?)
