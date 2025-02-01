@@ -90,7 +90,8 @@ class HearSay extends HTMLElement
 
         const allsubcomp = Array.from(subcompsreg).concat(Array.from(subcompssha));
         // will this do it (trigger attributeChangedCallback)?
-        allsubcomp.forEach( comp => comp.props = comp.props )
+        console.log("updating subcomps");
+        allsubcomp.forEach( comp => comp._props = comp._props )
 
         // call custom callback, if present (from setup())
 
@@ -138,6 +139,7 @@ class HearSay extends HTMLElement
 
     get props()
     {
+        console.log("get props");
         // TODO: document: add lit-props attribute
         // to specify a string literal as the value of props.
         // this avoids errors that would be caused by
@@ -153,7 +155,43 @@ class HearSay extends HTMLElement
         // lets props overwrite any of those values.
         // not sure if the || [] is necessary but I think so
         // like if you did this.props = {}
-        return { ...prop_func(this), ...(this.propsData || []) };
+        const comp = this;
+
+        const getPath = [{target: this, prop: "props"}];
+
+        const propsObj = { ...prop_func(this), ...(this.propsData || []) };
+        const proxy = (function makeProxy(obj)
+        {
+            const propsHandler =
+            {
+                get(target, prop)
+                {
+                    if (typeof target[prop] == "object")
+                    {
+                        getPath.unshift({target, prop})
+                        return makeProxy(target[prop])
+                    }
+                    else
+                        return target[prop];
+                },
+
+                set(target, prop, value)
+                {
+                    //comp.props = comp.props;
+                    console.log("set", getPath);
+                    target[prop] = value;
+                    getPath.reduce(
+                        (acc, {target: ptarget, prop: pprop}) => (ptarget[pprop] = acc, ptarget),
+                        target
+                    );
+                }
+            }
+            const proxy = new Proxy(obj, propsHandler);
+            return proxy;
+        })
+        (propsObj);
+
+        return proxy;
     }
 
     set props(val)
@@ -167,7 +205,7 @@ class HearSay extends HTMLElement
 
     get _props()
     {
-        this.getAttribute("props");
+        return this.getAttribute("props");
     }
 
     set _props(val)

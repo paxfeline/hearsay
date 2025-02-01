@@ -3,7 +3,12 @@
         <script src="hearsay.js"></script>
     </head>
     <body>
-        <hear-say src="simple.html" props="{name: 'Hello World App', subtitle: 'T2'}">
+        <hear-say src="simple.html" props="
+    {
+        name: 'Hello World App',
+        subtitle: 'T2',
+        foo: {bar: {baz: 'fizz'}}
+    }">
             <hear-say slot="title" src="simple.html" props="{title: self.component.props.name}">
             </hear-say>
         </hear-say>
