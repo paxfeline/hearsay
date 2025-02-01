@@ -145,32 +145,38 @@ class HearSay extends HTMLElement
         if (this.hasAttribute("lit-props")) return this.getAttribute("props");
 
         const prop_att = this.getAttribute("props")?.trim() || "{}";
-        const prop_func = Function("self", `try { return ${prop_att}; } catch { return ${JSON.stringify(prop_att)}; }`);
-        return prop_func(this);
+        const prop_func = Function("self", `return ${prop_att};`);
+        return { ...this._props, ...prop_func(this) };
     }
 
     set props(val)
     {
         if (this.hasAttribute("lit-props")) return this.setAttribute("props", val);
 
+        this._props = val;
         this.setAttribute("props-data", JSON.stringify(val));
     }
 
     get key()
     {
         // TODO: document: add lit-key attribute
-        // to specify a string literal as the value of key
+        // to specify a string literal as the value of key.
         if (this.hasAttribute("lit-key")) return this.getAttribute("key");
 
         const prop_att = this.getAttribute("key")?.trim() || "null";
-        const prop_func = Function("self", `try { return ${prop_att}; } catch { return ${JSON.stringify(prop_att)}; }`);
-        return prop_func(this);
+        const prop_func = Function("self", `return ${prop_att};`);
+        return this._key || prop_func(this);
     }
 
     set key(val)
     {
-        this.setAttribute("key", typeof val == "object" ? JSON.stringify(val) : val);
+        if (this.hasAttribute("lit-key")) return this.setAttribute("key", val);
+
+        this._key = val;
+        this.setAttribute("key-data", JSON.stringify(val));
     }
+
+    // register attributes to observe
 
     static observedAttributes = ["props","props-data", "key"];
 }
