@@ -187,7 +187,7 @@ class HearSay extends HTMLElement
             (instead of having to replace the props object).
         */
        
-        const propsObj = { ...prop_func(this), ...(this.propsData || []) };
+        const propsObj = { ...prop_func(this), ...(this.propsData || {}) };
        
         const getPath = [{target: this, prop: "props"}];
         const proxy = (function makeProxy(obj)
@@ -214,8 +214,8 @@ class HearSay extends HTMLElement
                     );
                 }
             }
-            const proxy = new Proxy(obj, propsHandler);
-            return proxy;
+            const retproxy = new Proxy(obj, propsHandler);
+            return retproxy;
         })
         (propsObj);
 
@@ -225,7 +225,7 @@ class HearSay extends HTMLElement
     set props(val)
     {
         // was blah blah... this.setAttribute("props", val)
-        if (this.hasAttribute("lit-props")) return (props = val);
+        if (this.hasAttribute("lit-props")) return (props = val, true);
 
         this.propsData = val;
         this.setAttribute("props-data", JSON.stringify(val));
