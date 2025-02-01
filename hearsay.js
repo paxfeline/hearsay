@@ -153,15 +153,26 @@ class HearSay extends HTMLElement
         // lets props overwrite any of those values.
         // not sure if the || [] is necessary but I think so
         // like if you did this.props = {}
-        return { ...(this._props || []), ...prop_func(this) };
+        return { ...prop_func(this), ...(this.propsData || []) };
     }
 
     set props(val)
     {
-        if (this.hasAttribute("lit-props")) return this.setAttribute("props", val);
+        // was blah blah... this.setAttribute("props", val)
+        if (this.hasAttribute("lit-props")) return (props = val);
 
-        this._props = val;
+        this.propsData = val;
         this.setAttribute("props-data", JSON.stringify(val));
+    }
+
+    get _props()
+    {
+        this.getAttribute("props");
+    }
+
+    set _props(val)
+    {
+        this.setAttribute("props", val);
     }
 
     get key()
