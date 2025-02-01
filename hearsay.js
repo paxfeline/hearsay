@@ -150,16 +150,46 @@ class HearSay extends HTMLElement
         const prop_att = this.getAttribute("props")?.trim() || "{}";
         const prop_func = Function("self", `return ${prop_att};`);
 
-        // returns a composite object
-        // uses props-data as a basis, but
-        // lets props overwrite any of those values.
-        // not sure if the || [] is necessary but I think so
-        // like if you did this.props = {}
-        const comp = this;
-
-        const getPath = [{target: this, prop: "props"}];
-
+        /* what follows is like this: 
+            First, the props attribute is evaluated for a returned object,
+            which is then combined with propsData, which is programmatically
+            set via the props setter.
+            A proxy is made for the composite object, with a special getting and setter.
+            One thing it does is, if an object property of props is being returned,
+            it wraps the object in the same proxy. So when accessing nested object,
+            each gets wrapped in the proxy before being returned.
+            But why? The getter also prepends information about the current
+            getter call to the getPath array.
+            This means that if you write:
+                this.props.foo.bar.baz = 42;
+            in the process, first the props() getter is called.
+            It generates the composite object, wraps it in a proxy, and returns it.
+            getPath starts out as [{target: self, prop: "props"}]
+            Then, as the code is evaluated, the proxy's getter method is called.
+            It prepends its information, so getPath will become
+            [{target: (object), prop: "foo"}, {target: self, prop: "props"}]
+            And as this process continues the array grows to:
+                [
+                    {target: (foo object), prop: "bar"},
+                    {target: (props object), prop: "foo"},
+                    {target: this, prop: "props"}
+                ]
+            Finally code execution reaches the equals sign and the setter is called.
+            First, the setter does its job: sets the value of the property on the target.
+            Then, it's time to go backwards:
+            The reduce function is used to iterate the getPath array.
+            First the current target, {baz: 42}, is assigned foo.bar,
+                the foo object is assigned to props.foo, and finally
+                the props object is assigned to this.props.
+            
+            All this so that users can mutate the props object,
+            and have the changes be reflected
+            (instead of having to replace the props object).
+        */
+       
         const propsObj = { ...prop_func(this), ...(this.propsData || []) };
+       
+        const getPath = [{target: this, prop: "props"}];
         const proxy = (function makeProxy(obj)
         {
             const propsHandler =
@@ -177,8 +207,6 @@ class HearSay extends HTMLElement
 
                 set(target, prop, value)
                 {
-                    //comp.props = comp.props;
-                    console.log("set", getPath);
                     target[prop] = value;
                     getPath.reduce(
                         (acc, {target: ptarget, prop: pprop}) => (ptarget[pprop] = acc, ptarget),
