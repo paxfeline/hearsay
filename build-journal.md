@@ -67,7 +67,7 @@ A custom element is not obliged to display its children. However, if you would l
 
 If a top-level child of your component has a `slot` attribute that matches the `name` attribute of a `<slot>` element in your component's source (i.e. it's shadow DOM), it will be rendered in that slot.
 
-Slots can also have default content, in case the component has no (matching) child elements.
+Named slots can have default content, in case the component has no children with matching `slot` attributes.
 
 hearsay components have a `slot()` method that can be used to programmatically fill slots. It takes the following parameters:
 - slot: "slot" for the default slot, or a slot's `name`.
@@ -136,7 +136,7 @@ If you wanted to output a string that would otherwise be interpreted as code, yo
 
 **Technical Note**: I found that using setAttribute, HTML entities are encoded; in particular, quotation marks. That is, while calling `setAttribute("props", '"foo": "bar"')` results in the DOM looking like `props="&quot;foo&quot;: &quot;bar&quot;"`. This would be tedious to write by hand, but it's valid, and `getAttribute()` converts the HTML entities back into their actual characters (i.e. quotation marks, inside the prop_att string). This broke my initial approach, which was to `return "${prop_att}";` in the `catch` block. Using `JSON.stringigy()` is more robust.
 
-### First Corollary
+### Corollary to `<hear-say>` element
 
 It's a pretty straightforward extension of the ideas above to allow any HTML element to respond to broadcasts. To enable this, hearsay has the `broadcast` function also send messages to elements with a `data-consumer` attribute. This attribute should contain code for a function with the parameters `self`, `data`, and `recipient` (same as the `react` method described above). The `self` parameter will reference the HTML element receiving the message.
 

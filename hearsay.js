@@ -72,7 +72,7 @@ class HearSay extends HTMLElement
     //disconnected
     //adopted
     
-    attributeChangedCallback()
+    attributeChangedCallback(name, oldValue, newValue)
     {
         // if the props attribute changes,
         // j-s elements in this component should be recalculateds
@@ -86,14 +86,15 @@ class HearSay extends HTMLElement
         // update the props attribute of all sub-components
 
         const subcompsreg = this.querySelectorAll("hear-say");
-        const subcompssha = this.shadowRoot?.querySelectorAll("hear-say");
+        const subcompssha = this.shadowRoot?.querySelectorAll("hear-say") || [];
 
+        const allsubcomp = Array.from(subcompsreg).concat(Array.from(subcompssha));
         // will this do it (trigger attributeChangedCallback)?
-        Array.from(subcompsreg).forEach( comp => comp.props = comp.props )
+        allsubcomp.forEach( comp => comp.props = comp.props )
 
         // call custom callback, if present (from setup())
 
-        this.attributeChanged?.();
+        this.attributeChanged?.(name, oldValue, newValue);
     }
 
     /* util functions */
@@ -150,7 +151,9 @@ class HearSay extends HTMLElement
 
     set props(val)
     {
-        this.setAttribute("props", typeof val == "object" ? JSON.stringify(val) : val);
+        if (this.hasAttribute("lit-props")) return this.setAttribute("props", val);
+
+        this.setAttribute("props-data", JSON.stringify(val));
     }
 
     get key()
@@ -169,7 +172,7 @@ class HearSay extends HTMLElement
         this.setAttribute("key", typeof val == "object" ? JSON.stringify(val) : val);
     }
 
-    static observedAttributes = ["props", "key"];
+    static observedAttributes = ["props","props-data", "key"];
 }
 
 customElements.define("hear-say", HearSay);
