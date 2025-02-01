@@ -137,6 +137,20 @@ class HearSay extends HTMLElement
     // key and props should accept JS code
     // and fall back to their string values
 
+            /* new idea:
+
+            return a proxy from get props()
+
+            the proxy will then get or set
+            properties on the appropriate object:
+            props (get) or dataProps (get or set)
+
+            will have to override iterate
+            or whatever it is
+
+            also cache props?
+            */
+
     get props()
     {
         console.log("get props");
