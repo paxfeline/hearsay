@@ -144,9 +144,16 @@ class HearSay extends HTMLElement
         // the string being interpretted as javascript (below).
         if (this.hasAttribute("lit-props")) return this.getAttribute("props");
 
+        // TODO: add component, props parameters
         const prop_att = this.getAttribute("props")?.trim() || "{}";
         const prop_func = Function("self", `return ${prop_att};`);
-        return { ...this._props, ...prop_func(this) };
+
+        // returns a composite object
+        // uses props-data as a basis, but
+        // lets props overwrite any of those values.
+        // not sure if the || [] is necessary but I think so
+        // like if you did this.props = {}
+        return { ...(this._props || []), ...prop_func(this) };
     }
 
     set props(val)
@@ -165,6 +172,9 @@ class HearSay extends HTMLElement
 
         const prop_att = this.getAttribute("key")?.trim() || "null";
         const prop_func = Function("self", `return ${prop_att};`);
+
+        // returns key-data if its been programmatically set,
+        // otherwise the regular key value
         return this._key || prop_func(this);
     }
 

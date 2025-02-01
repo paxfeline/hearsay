@@ -77,64 +77,11 @@ hearsay components have a `slot()` method that can be used to programmatically f
 
 One thing I don't hate about React is the way you can supply data to a component through "props." The hearsay version of this is to include a `props` attribute for a component, if desired. Like all HTML attributes (including ones that are interpreted as JavaScript code), they are stored as strings. One convenience hearsay provides is a special getter method for `props`.
 
-This is what it looks like:
+The code for this evolved a bit as I worked on it. I ran into the problem that if I programmatically set `props`, it would overwrite any code that had previously been held there.
 
-```javascript
-get props()
-{
-    const prop_att = this.getAttribute("props")?.trim() || "{}";
-    if (!this._props)
-        this._props = Function(`try { return ${prop_att}; } catch { return ${JSON.stringify(prop_att)}; }`);
-    return this._props();
-}
-```
+My solution was to add a private property: `_props`. It's also made visible in the DOM through the `props-data` attribute. `_props` stores a JavaScript object that holds whatever value you set `props` to. This allows you to add objects to `props` via code.
 
-So say you had this HTML code:
-
-```html
-<hear-say 
-    src="clicker.html"
-    props="{title: 'titular item'}">
-</hear-say>
-```
-
-hearsay extracts the text from the `props` attribute and inserts it into a function with this code:
-
-```javascript
-try
-{
-    return {title: 'titular item'};
-}
-catch
-{
-    return return ${JSON.stringify("{title: 'titular item'}")};
-}
-```
-
-This formulation also allows for the (I think uncommon) situation where you might want `props` to hold a single string value. In this case, the `try...catch` statement allows you to forgo an extra set of quotation marks. For example:
-
-```html
-<hear-say src="clicker.html" props="this is a test"></hear-say>
-```
-
-```javascript
-try
-{
-    return this is a test;
-}
-catch
-{
-    return return ${JSON.stringify("this is a test")};
-}
-```
-
-If you wanted to output a string that would otherwise be interpreted as code, you can fall back to a second set of quotation marks:
-
-```html
-<hear-say src="clicker.html" props="'alert(42)'"></hear-say>
-```
-
-**Technical Note**: I found that using setAttribute, HTML entities are encoded; in particular, quotation marks. That is, while calling `setAttribute("props", '"foo": "bar"')` results in the DOM looking like `props="&quot;foo&quot;: &quot;bar&quot;"`. This would be tedious to write by hand, but it's valid, and `getAttribute()` converts the HTML entities back into their actual characters (i.e. quotation marks, inside the prop_att string). This broke my initial approach, which was to `return "${prop_att}";` in the `catch` block. Using `JSON.stringigy()` is more robust.
+There is still some weirdness I'd like to fix. In particular, the system prioritizes the original value of `props`, which may contain JavaScript code to generate values -- it only allows you to add to `props`, not to overwrite properties coded in the `props` attribute.
 
 ### Corollary to `<hear-say>` element
 
