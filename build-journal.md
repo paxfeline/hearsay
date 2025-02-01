@@ -77,11 +77,11 @@ hearsay components have a `slot()` method that can be used to programmatically f
 
 One thing I don't hate about React is the way you can supply data to a component through "props." The hearsay version of this is to include a `props` attribute for a component, if desired. Like all HTML attributes (including ones that are interpreted as JavaScript code), they are stored as strings. One convenience hearsay provides is a special getter method for `props`.
 
-The code for this evolved a bit as I worked on it. I ran into the problem that if I programmatically set `props`, it would overwrite any code that had previously been held there.
+The code for this evolved a bit as I worked. I ran into the problem that if I programmatically set `props`, it would overwrite any code that had previously been held there.
 
 My solution was to add a private property: `_props`. It's also made visible in the DOM through the `props-data` attribute. `_props` stores a JavaScript object that holds whatever value you set `props` to. This allows you to add objects to `props` via code.
 
-There is still some weirdness I'd like to fix. In particular, the system prioritizes the original value of `props`, which may contain JavaScript code to generate values -- it only allows you to add to `props`, not to overwrite properties coded in the `props` attribute.
+There is still some weirdness I'd like to fix. In particular, the system prioritizes the value of the `props` attribute, which may contain JavaScript code to generate values -- it only allows you to add to `props`, not to overwrite properties coded in the `props` attribute.
 
 ### Corollary to `<hear-say>` element
 
