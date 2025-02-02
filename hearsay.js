@@ -169,12 +169,12 @@ class HearSay extends HTMLElement
             // kind of fudgey way to DRY(M)
             let targetObj;
             if (ptarget)
-                targetObj = ptarget
+                targetObj = ptarget;
             else
             {
-                // if this propsData subobject doesn't exist, create an empty one
-                propsDataChain[prop] = propsDataChain[prop] || {};
-                targetObj = { props: propsVal, propsData: propsDataChain[prop] }
+                // // if this propsData subobject doesn't exist, create an empty one
+                //propsDataChain[prop] = propsDataChain[prop] || {};
+                targetObj = { props: propsVal, propsData: propsDataChain, prop };
             }
             const propsPropsProxyHandler =
             {
@@ -182,11 +182,16 @@ class HearSay extends HTMLElement
                 {
                     //console.log(target.propsData, propsDataChain, target.propsData == propsDataChain)
                     //console.log(target.props[pprop], propsVal, target.props[pprop] == propsVal);
-                    const val = propsVal[pprop] || target.propsData[pprop];
+                    const propsDataVal = target.prop ? target.propsData[target.prop] : target.propsData;
+                    const val = propsDataVal?.[pprop] || propsVal[pprop];
                     //const val = propsDataChain[prop][pprop] || propsChain[prop][pprop];
                     if (typeof val == "object")
-                        return makePropsPropsProxy(propsVal[pprop], target.propsData, pprop)
+                    {
+                        if (!propsDataVal)
+                            propsDataVal = target.propsData[target.prop] = {};
+                        return makePropsPropsProxy(propsVal[pprop], propsDataVal, pprop)
                         //return makePropsPropsProxy(propsChain[prop], propsDataChain[prop], pprop)
+                    }
                     else
                         return val;
                 },
@@ -194,7 +199,16 @@ class HearSay extends HTMLElement
                 set(target, pprop, val, receiver)
                 {
                     console.log("set prop proxy prop", target, pprop, val, receiver);
-                    target.propsData[pprop] = val;
+                    if (target.prop)
+                    {
+                        if (!target.propsData[target.prop]) target.propsData[target.prop] = {};
+                        target.propsData[target.prop][pprop] = val;
+                    }
+                    else
+                    {
+                        target.propsData[pprop] = val;
+                    }
+                    // trigger update
                     self.props = self.propsData;
                 }
             }
