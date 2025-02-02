@@ -164,21 +164,28 @@ class HearSay extends HTMLElement
         const prop_att = this.getAttribute("props")?.trim() || "{}";
         const prop_func = Function("self", `return ${prop_att};`);
        
-        function makePropsPropsProxy(propsChain, propsDataChain, prop)
+        function makePropsPropsProxy(propsVal, propsDataChain, prop, ptarget)
         {
-            // props[Chain] is functionally immutable
-            propsChain[prop] = propsChain[prop];
-            // if this propsData subobject doesn't exist, create an empty one
-            propsDataChain[prop] = propsDataChain[prop] || {};
-            const targetObj = { props: propsChain[prop], propsData: propsDataChain[prop] }
+            // kind of fudgey way to DRY(M)
+            let targetObj;
+            if (ptarget)
+                targetObj = ptarget
+            else
+            {
+                // if this propsData subobject doesn't exist, create an empty one
+                propsDataChain[prop] = propsDataChain[prop] || {};
+                targetObj = { props: propsVal, propsData: propsDataChain[prop] }
+            }
             const propsPropsProxyHandler =
             {
                 get(target, pprop)
                 {
-                    const val = target.props[pprop] || target.propsData[pprop];
+                    //console.log(target.propsData, propsDataChain, target.propsData == propsDataChain)
+                    //console.log(target.props[pprop], propsVal, target.props[pprop] == propsVal);
+                    const val = propsVal[pprop] || target.propsData[pprop];
                     //const val = propsDataChain[prop][pprop] || propsChain[prop][pprop];
                     if (typeof val == "object")
-                        return makePropsPropsProxy(target.props, target.propsData, pprop)
+                        return makePropsPropsProxy(propsVal[pprop], target.propsData, pprop)
                         //return makePropsPropsProxy(propsChain[prop], propsDataChain[prop], pprop)
                     else
                         return val;
@@ -188,7 +195,7 @@ class HearSay extends HTMLElement
                 {
                     console.log("set prop proxy prop", target, pprop, val, receiver);
                     target.propsData[pprop] = val;
-                    self.props = propsProxyTarget.propsData;
+                    self.props = self.propsData;
                 }
             }
             const proxy = new Proxy(targetObj, propsPropsProxyHandler);
@@ -196,8 +203,11 @@ class HearSay extends HTMLElement
         }
 
         const self = this;
-        // create because may be needed
+        // create propsData because may be needed
         if (!this.propsData) this.propsData = {};
+        const proxy = makePropsPropsProxy(prop_func(this), this.propsData, null, this);
+
+        /*
         const propsProxyTarget = { props: prop_func(this), propsData: this.propsData };
         const propsProxyHandler = {
             get(target, prop)
@@ -225,6 +235,7 @@ class HearSay extends HTMLElement
         }
 
         const proxy = new Proxy(propsProxyTarget, propsProxyHandler);
+        */
 
         return proxy;
     }
