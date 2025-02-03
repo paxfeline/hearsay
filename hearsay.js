@@ -1,9 +1,18 @@
 window.hearsay = {}
 
+function recurseToArray(el, prop)
+{
+    return [el, ...(el[prop] ? recurseToArray(el[prop]) : [])];
+}
+
 function setup(opts)
 {
     // copy all properties from opts to element
     Object.assign(this.elements.current, opts);
+
+    // delay init if this is a child component
+    // and the parent isn't inited
+    
 
     // call the init function (if present)
     opts.init?.(this.elements.current);
@@ -16,6 +25,8 @@ class HearSay extends HTMLElement
     constructor()
     {
         super();
+        
+        this.inited = false;
     }
 
     connectedCallback()
@@ -64,6 +75,9 @@ class HearSay extends HTMLElement
             } )
         }
 
+        // used to help subcomponents
+        this.inited = true;
+
         this.connected?.();
     }
 
@@ -76,6 +90,19 @@ class HearSay extends HTMLElement
     {
         // if the props attribute changes,
         // j-s elements in this component should be recalculateds
+        // and update the props attribute of all sub-components
+        this.recalculate()
+
+        // call custom callback, if present (from setup())
+
+        this.attributeChanged?.(name, oldValue, newValue);
+    }
+
+    recalculate()
+    {
+        //console.log("updating subcomps");
+
+        // recalculate j-s elements in this component
 
         const hsregjs = this.querySelectorAll("j-s");
         const hsshajs = this.shadowRoot?.querySelectorAll("j-s") || [];
@@ -89,13 +116,9 @@ class HearSay extends HTMLElement
         const subcompssha = this.shadowRoot?.querySelectorAll("hear-say") || [];
 
         const allsubcomp = Array.from(subcompsreg).concat(Array.from(subcompssha));
-        // will this do it (trigger attributeChangedCallback)?
-        console.log("updating subcomps");
+
+        // this should trigger attributeChangedCallback on all sub-components
         allsubcomp.forEach( comp => comp._props = comp._props )
-
-        // call custom callback, if present (from setup())
-
-        this.attributeChanged?.(name, oldValue, newValue);
     }
 
     /* util functions */
@@ -164,6 +187,8 @@ class HearSay extends HTMLElement
         const prop_att = this.getAttribute("props")?.trim() || "{}";
         const prop_func = Function("self", `return ${prop_att};`);
        
+        const self = this;
+
         function makePropsPropsProxy(propsVal, propsDataChain, prop, ptarget)
         {
             // kind of fudgey way to DRY(M)
@@ -216,7 +241,6 @@ class HearSay extends HTMLElement
             return proxy;
         }
 
-        const self = this;
         // create propsData because may be needed
         if (!this.propsData) this.propsData = {};
         const proxy = makePropsPropsProxy(prop_func(this), this.propsData, null, this);
