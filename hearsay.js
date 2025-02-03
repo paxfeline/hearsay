@@ -1,18 +1,9 @@
 window.hearsay = {}
 
-function recurseToArray(el, prop)
-{
-    return [el, ...(el[prop] ? recurseToArray(el[prop]) : [])];
-}
-
 function setup(opts)
 {
     // copy all properties from opts to element
     Object.assign(this.elements.current, opts);
-
-    // delay init if this is a child component
-    // and the parent isn't inited
-    
 
     // call the init function (if present)
     opts.init?.(this.elements.current);
@@ -72,13 +63,19 @@ class HearSay extends HTMLElement
     
                 // revert elements
                 hearsay.elements = hearsay.elements.previous;
+
+                // connection complete
+
+                // used to help subcomponents
+                this.inited = true;
+        
+                // user-provided callback
+                this.connected?.();
+        
+                // update j-s and child components
+                this.recalculate();
             } )
         }
-
-        // used to help subcomponents
-        this.inited = true;
-
-        this.connected?.();
     }
 
     // other custom element lifecycle callbacks:
