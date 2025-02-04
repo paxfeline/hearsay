@@ -204,7 +204,7 @@ class HearSay extends HTMLElement
                 {
                     //console.log(target.propsData, propsDataChain, target.propsData == propsDataChain)
                     //console.log(target.props[pprop], propsVal, target.props[pprop] == propsVal);
-                    const propsDataVal = target.prop ? target.propsData[target.prop] : target.propsData;
+                    let propsDataVal = target.prop ? target.propsData[target.prop] : target.propsData;
                     const val = propsDataVal?.[pprop] || propsVal[pprop];
                     //const val = propsDataChain[prop][pprop] || propsChain[prop][pprop];
                     if (typeof val == "object")
@@ -230,6 +230,14 @@ class HearSay extends HTMLElement
                     {
                         target.propsData[pprop] = val;
                     }
+                    // trigger update
+                    self.props = self.propsData;
+                },
+
+                deleteProperty(target, prop) {
+                    let t = target.propsData;
+                    if (target.prop) t = t[target.prop];
+                    if (prop in t) delete t[prop];
                     // trigger update
                     self.props = self.propsData;
                 }
