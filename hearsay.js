@@ -221,6 +221,16 @@ class HearSay extends HTMLElement
                 set(target, pprop, val, receiver)
                 {
                     console.log("set prop proxy prop", target, pprop, val, receiver);
+                    let t = target.propsData;
+                    if (target.prop)
+                    {
+                        if (!t[target.prop]) t[target.prop] = {};
+                        t = t[target.prop];
+                    }
+                    t[pprop] = val;
+
+                    /*
+                    //old version:
                     if (target.prop)
                     {
                         if (!target.propsData[target.prop]) target.propsData[target.prop] = {};
@@ -230,6 +240,8 @@ class HearSay extends HTMLElement
                     {
                         target.propsData[pprop] = val;
                     }
+                    */
+                    
                     // trigger update
                     self.props = self.propsData;
                 },
@@ -249,36 +261,6 @@ class HearSay extends HTMLElement
         // create propsData because may be needed
         if (!this.propsData) this.propsData = {};
         const proxy = makePropsPropsProxy(prop_func(this), this.propsData, null, this);
-
-        /*
-        const propsProxyTarget = { props: prop_func(this), propsData: this.propsData };
-        const propsProxyHandler = {
-            get(target, prop)
-            {
-                console.log("props proxy get", this);
-                // get prop, try from propsData first, then props
-                let propsDataVal = target.propsData[prop];
-                let propsVal = target.props[prop];
-                const val = propsDataVal || propsVal;
-                if (typeof val == "object")
-                {
-                    // if blah doesn't exist, create an empty one
-                    return makePropsPropsProxy(target.props, target.propsData, prop);
-                    //return makePropsPropsProxy({props: propsVal, propsData: propsDataVal});
-                }
-                // else:
-                return val;
-            },
-            set(target, prop, val, receiver)
-            {
-                console.log("set prop", target, prop, val, receiver);
-                target.propsData[prop] = val;
-                self.props = self.propsData;
-            }
-        }
-
-        const proxy = new Proxy(propsProxyTarget, propsProxyHandler);
-        */
 
         return proxy;
     }
