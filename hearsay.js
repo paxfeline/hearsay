@@ -22,6 +22,12 @@ class HearSay extends HTMLElement
 
     connectedCallback()
     {
+        // set up src for built-in components
+        if (this.hasAttribute("multiplier") || this.hasAttribute("map"))
+        {
+            this.setAttribute("src", "Multiplier.html");
+        }
+
         // fetch the component html file
         // and attach a shadow DOM
         if (this.hasAttribute("src"))
@@ -70,7 +76,7 @@ class HearSay extends HTMLElement
                 this.inited = true;
         
                 // user-provided callback
-                this.connected?.();
+                this.connected?.(this);
         
                 // update j-s and child components
                 this.recalculate();
@@ -80,8 +86,15 @@ class HearSay extends HTMLElement
 
     // other custom element lifecycle callbacks:
     
-    //disconnected
-    //adopted
+    disconnectedCallback()
+    {
+        this.disconnected?.(this);
+    }
+    
+    adoptedCallback()
+    {
+        this.adopted?.(this);
+    }
     
     attributeChangedCallback(name, oldValue, newValue)
     {
@@ -92,7 +105,7 @@ class HearSay extends HTMLElement
 
         // call custom callback, if present (from setup())
 
-        this.attributeChanged?.(name, oldValue, newValue);
+        this.attributeChanged?.(this, name, oldValue, newValue);
     }
 
     recalculate()
@@ -186,32 +199,46 @@ class HearSay extends HTMLElement
        
         const self = this;
 
-        function makePropsPropsProxy(propsVal, propsDataChain, prop, ptarget)
+        function makePropsPropsProxy(propsVal, propsData, prop)
         {
-            // kind of fudgey way to DRY(M)
-            let targetObj;
-            if (ptarget)
-                targetObj = ptarget;
-            else
-            {
-                // // if this propsData subobject doesn't exist, create an empty one
-                //propsDataChain[prop] = propsDataChain[prop] || {};
-                targetObj = { props: propsVal, propsData: propsDataChain, prop };
-            }
+            // kind of fudgey way to DRY
+            const targetObj = { propsVal, propsData, prop };
             const propsPropsProxyHandler =
             {
                 get(target, pprop)
                 {
-                    //console.log(target.propsData, propsDataChain, target.propsData == propsDataChain)
-                    //console.log(target.props[pprop], propsVal, target.props[pprop] == propsVal);
-                    let propsDataVal = target.prop ? target.propsData[target.prop] : target.propsData;
-                    const val = propsDataVal?.[pprop] || propsVal[pprop];
+                    //console.log(target.propsData, propsDataChain,
+                    // target.propsData == propsDataChain)
+                    //console.log(target.props[pprop], propsVal,
+                    // target.props[pprop] == propsVal);
+
+                    let propsDataVal = target.prop ?
+                        target.propsData[target.prop] :
+                        target.propsData;
+                    const val = propsDataVal?.[pprop] || target.propsVal[pprop];
+
+                    if (pprop == "length")
+                    {
+                        console.log("len", this);
+                        return this.getOwnKeys(target).length;
+                    }
+                    
+                    if (pprop == "toJSON")
+                    {
+                        console.log("toJSON", target);
+                        return () => JSON.stringify( // a function
+                            ({
+                                ...(target.propsVal || {}),
+                                ...(propsDataVal || {})
+                            }));
+                    }
+                    
                     //const val = propsDataChain[prop][pprop] || propsChain[prop][pprop];
                     if (typeof val == "object")
                     {
                         if (!propsDataVal)
                             propsDataVal = target.propsData[target.prop] = {};
-                        return makePropsPropsProxy(propsVal[pprop], propsDataVal, pprop)
+                        return makePropsPropsProxy(target.propsVal[pprop], propsDataVal, pprop)
                         //return makePropsPropsProxy(propsChain[prop], propsDataChain[prop], pprop)
                     }
                     else
@@ -228,25 +255,25 @@ class HearSay extends HTMLElement
                         t = t[target.prop];
                     }
                     t[pprop] = val;
-
-                    /*
-                    //old version:
-                    if (target.prop)
-                    {
-                        if (!target.propsData[target.prop]) target.propsData[target.prop] = {};
-                        target.propsData[target.prop][pprop] = val;
-                    }
-                    else
-                    {
-                        target.propsData[pprop] = val;
-                    }
-                    */
                     
                     // trigger update
                     self.props = self.propsData;
                 },
 
-                deleteProperty(target, prop) {
+                getOwnKeys(target)
+                {
+                    console.log("gok");
+                    return Array.from(
+                        new Set(
+                            [
+                                ...Object.keys(target.propsVal || {}),
+                                ...Object.keys(target.propsData || {})
+                            ]
+                        ));
+                },
+
+                deleteProperty(target, prop)
+                {
                     let t = target.propsData;
                     if (target.prop) t = t[target.prop];
                     if (prop in t) delete t[prop];
@@ -260,7 +287,7 @@ class HearSay extends HTMLElement
 
         // create propsData because may be needed
         if (!this.propsData) this.propsData = {};
-        const proxy = makePropsPropsProxy(prop_func(this), this.propsData, null, this);
+        const proxy = makePropsPropsProxy(prop_func(this), this.propsData);
 
         return proxy;
     }
@@ -313,6 +340,20 @@ class HearSay extends HTMLElement
 
 customElements.define("hear-say", HearSay);
 
+function broadcast(data, recipient)
+{
+    // data-consumer elements
+    const allConsumerElements = document.querySelectorAll("hear-say");
+    allConsumerElements.forEach( consumer => consumer.react?.(consumer, data, recipient) );
+    
+    // elements with data-consumer attribute
+    const allConsumerCallbacks = document.querySelectorAll("[data-consumer]");
+    allConsumerCallbacks.forEach( consumer =>
+        Function("self, data, recipient", consumer.dataset.consumer)(consumer, data, recipient) );
+}
+
+hearsay.broadcast = broadcast.bind(hearsay);
+
 class HearSayJS extends HTMLElement
 {
     constructor()
@@ -339,19 +380,6 @@ class HearSayJS extends HTMLElement
 
 customElements.define("j-s", HearSayJS);
 
-function broadcast(data, recipient)
-{
-    // data-consumer elements
-    const allConsumerElements = document.querySelectorAll("hear-say");
-    allConsumerElements.forEach( consumer => consumer.react?.(consumer, data, recipient) );
-    
-    // elements with data-consumer attribute
-    const allConsumerCallbacks = document.querySelectorAll("[data-consumer]");
-    allConsumerCallbacks.forEach( consumer =>
-        Function("self, data, recipient", consumer.dataset.consumer)(consumer, data, recipient) );
-}
-
-hearsay.broadcast = broadcast.bind(hearsay);
-
 // copy all hearsay methods (init, broadcast) to global scope
+// TODO: offer a way to avoid this if desired, besides removing the code
 Object.assign(window, hearsay);

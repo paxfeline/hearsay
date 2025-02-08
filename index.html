@@ -3,20 +3,16 @@
         <script src="hearsay.js"></script>
     </head>
     <body>
-        <hear-say src="simple.html" props="
-    {
-        name: 'Hello World App',
-        subtitle: 'T2',
-        foo: {bar: {baz: 'fizz'}}
-    }">
-            <hear-say slot="title" src="simple.html" props="{title: self.component.props.name}">
+        <hear-say multiplier
+            props="
+                [
+                    {title: 'foo'},
+                    {title: 'bar'},
+                    {title: 'baz'}
+                ]
+        ">
+            <hear-say src="Simple.html">
             </hear-say>
-        </hear-say>
-        <hear-say src="clicker.html" props="{title: 'titular item'}" key="1">
-            <span slot="subheading">Click while you can!</span>
-        </hear-say>
-        <hear-say src="clicker.html" key="2">
-            <span slot="title">Click'im</span>
         </hear-say>
     </body>
 </html>

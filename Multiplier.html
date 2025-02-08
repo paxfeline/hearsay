@@ -1,0 +1,42 @@
+<script>
+    setup({
+        init: (self) =>
+        {
+            console.log("init", self.innerHTML);
+
+            self.reloadChildren(self);
+        },
+        attributeChanged: (self, name, oldValue, newValue) =>
+        {
+            self.reloadChildren(self);
+        },
+        reloadChildren: (self) =>
+        {
+            const propsArray = Array.from(self.props);
+
+            console.log("atts changed", propsArray);
+
+            const template = self.shadowRoot.querySelector("slot");
+            const mroot = self.shadowRoot.querySelector("#mult-root");
+
+            const els = propsArray.map(props =>
+            {
+                const el = template.assignedElements()[0].cloneNode(true);
+                el._props = JSON.stringify(props);
+                return el;
+
+            } );
+
+            mroot.replaceChildren(...els);
+        },
+        react: (self, data, recipient) =>
+        {
+            ;
+        },
+    });
+</script>
+
+<slot></slot>
+
+<div id="mult-root"></div>
+
