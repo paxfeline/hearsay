@@ -226,11 +226,11 @@ class HearSay extends HTMLElement
                     if (pprop == "toJSON")
                     {
                         console.log("toJSON", target);
-                        return () => JSON.stringify( // a function
+                        return () => // a function
                             ({
                                 ...(target.propsVal || {}),
                                 ...(propsDataVal || {})
-                            }));
+                            });
                     }
                     
                     //const val = propsDataChain[prop][pprop] || propsChain[prop][pprop];
