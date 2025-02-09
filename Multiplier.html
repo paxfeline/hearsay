@@ -4,13 +4,9 @@
         {
             console.log("init", self.innerHTML);
 
-            self.reloadChildren(self);
+            self.refresh(self);
         },
-        attributeChanged: (self, name, oldValue, newValue) =>
-        {
-            self.reloadChildren(self);
-        },
-        reloadChildren: (self) =>
+        refresh: (self) =>
         {
             const propsArray = Array.from(self.props);
 

@@ -79,7 +79,7 @@ class HearSay extends HTMLElement
                 this.connected?.(this);
         
                 // update j-s and child components
-                this.recalculate();
+                this.refreshCallback();
             } )
         }
     }
@@ -101,14 +101,14 @@ class HearSay extends HTMLElement
         // if the props attribute changes,
         // j-s elements in this component should be recalculateds
         // and update the props attribute of all sub-components
-        this.recalculate()
+        this.refreshCallback()
 
         // call custom callback, if present (from setup())
 
         this.attributeChanged?.(this, name, oldValue, newValue);
     }
 
-    recalculate()
+    refreshCallback()
     {
         //console.log("updating subcomps");
 
@@ -129,6 +129,9 @@ class HearSay extends HTMLElement
 
         // this should trigger attributeChangedCallback on all sub-components
         allsubcomp.forEach( comp => comp._props = comp._props )
+
+        // user callback
+        this.refresh?.(this);
     }
 
     /* util functions */
