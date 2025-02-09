@@ -6,12 +6,14 @@
         <hear-say multiplier
             props="
                 [
-                    {title: 'foo'},
-                    {title: 'bar'},
-                    {title: 'baz'}
+                    [{title: 'foo'}, {title: 'foo2'}, {title: 'foo3'}],
+                    [{title: 'bar'}, {title: 'bar2'}, {title: 'bar3'}],
+                    [{title: 'baz'}, {title: 'baz2'}, {title: 'baz3'}]
                 ]
         ">
-            <hear-say src="Simple.html">
+            <hear-say multiplier>
+                <hear-say src="Simple.html">
+                </hear-say>
             </hear-say>
         </hear-say>
     </body>
