@@ -1,0 +1,54 @@
+<style>
+    .square {
+      background: #fff;
+      border: 1px solid #999;
+      float: left;
+      font-size: 24px;
+      font-weight: bold;
+      line-height: 34px;
+      height: 34px;
+      margin-right: -1px;
+      margin-top: -1px;
+      padding: 0;
+      text-align: center;
+      width: 34px;
+    }
+
+.board-row:after {
+  clear: both;
+  content: '';
+  display: table;
+}
+</style>
+
+<script>
+    setup({
+        init: self =>
+        {
+            self.props = Array(9).fill(null);
+            self.state = {turn: 'X'};
+        },
+        react: (self, data, recipient) =>
+        {
+            console.log(self, data, recipient);
+            self.props[recipient] = self.state.turn;
+            self.state.turn = self.state.turn == 'X' ? 'O' : 'X';
+        }
+    })
+</script>
+
+<div class="board-row">
+    <hear-say src="Square.html" props="self.component.props[0]" key="0"></hear-say>
+    <hear-say src="Square.html" props="self.component.props[1]" key="1"></hear-say>
+    <hear-say src="Square.html" props="self.component.props[2]" key="2"></hear-say>
+</div>
+<div class="board-row">
+    <hear-say src="Square.html" props="self.component.props[3]" key="3"></hear-say>
+    <hear-say src="Square.html" props="self.component.props[4]" key="4"></hear-say>
+    <hear-say src="Square.html" props="self.component.props[5]" key="5"></hear-say>
+</div>
+<div class="board-row">
+    <hear-say src="Square.html" props="self.component.props[6]" key="6"></hear-say>
+    <hear-say src="Square.html" props="self.component.props[7]" key="7"></hear-say>
+    <hear-say src="Square.html" props="self.component.props[8]" key="8"></hear-say>
+</div>

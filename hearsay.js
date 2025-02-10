@@ -171,21 +171,6 @@ class HearSay extends HTMLElement
     }
     
     // key and props should accept JS code
-    // and fall back to their string values
-
-            /* new idea:
-
-            return a proxy from get props()
-
-            the proxy will then get or set
-            properties on the appropriate object:
-            props (get) or dataProps (get or set)
-
-            will have to override iterate
-            or whatever it is
-
-            also cache props?
-            */
 
     get props()
     {
@@ -210,11 +195,6 @@ class HearSay extends HTMLElement
             {
                 get(target, pprop)
                 {
-                    //console.log(target.propsData, propsDataChain,
-                    // target.propsData == propsDataChain)
-                    //console.log(target.props[pprop], propsVal,
-                    // target.props[pprop] == propsVal);
-
                     let propsDataVal = target.prop ?
                         target.propsData[target.prop] :
                         target.propsData;
@@ -288,11 +268,23 @@ class HearSay extends HTMLElement
             return proxy;
         }
 
-        // create propsData because may be needed
-        if (!this.propsData) this.propsData = {};
-        const proxy = makePropsPropsProxy(prop_func(this), this.propsData);
+        if (this.propsData != null && typeof this.propsData != "object")
+            return this.propsData || this.propsVal;
+        
+        const propVal = prop_func(this);
+
+        if (!this.propsData)
+        {
+            if (typeof propVal != "object")
+                return propVal;
+            
+            // create propsData because may be needed
+            this.propsData = {};
+        }
+        const proxy = makePropsPropsProxy(propVal, this.propsData);
 
         return proxy;
+
     }
 
     set props(val)
