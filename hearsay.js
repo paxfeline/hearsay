@@ -117,30 +117,43 @@ class HearSay extends HTMLElement
 
     refreshCallback()
     {
-        // user callback
+        // user callback first, then go through elements
+        // this allows the component to add elements
         Promise.resolve()
         .then(() => this.refresh?.(this))
         .then(() =>
         {
             //console.log("updating subcomps");
+
+            // find things to ignore so their children can also be ignored
+            
+            const ignorereg = this.querySelectorAll(".hearsay-ignore");
+            const ignoresha = this.shadowRoot?.querySelectorAll(".hearsay-ignore") || [];
+            const allignore = Array.from(ignorereg).concat(Array.from(ignoresha));
+
+            console.log("ignore this!", allignore);
     
             // recalculate j-s elements in this component
     
             const hsregjs = this.querySelectorAll("j-s");
             const hsshajs = this.shadowRoot?.querySelectorAll("j-s") || [];
-    
             const alljs = Array.from(hsregjs).concat(Array.from(hsshajs));
-            alljs.forEach( js => js.run() );
-    
+
+            const mostjs = alljs.filter( el => !allignore.includes( el ) );
+
+            mostjs.forEach( js => js.run() );
+            
             // update the props attribute of all sub-components
     
-            const subcompsreg = this.querySelectorAll("hear-say");
-            const subcompssha = this.shadowRoot?.querySelectorAll("hear-say") || [];
-    
+            const subcompsreg = this.querySelectorAll("hear-say:not(.hearsay-ignore)");
+            const subcompssha = this.shadowRoot?.querySelectorAll("hear-say:not(.hearsay-ignore)") || [];
+
             const allsubcomp = Array.from(subcompsreg).concat(Array.from(subcompssha));
+
+            const mostsubcomp = allsubcomp.filter( el => !allignore.includes( el ) );
     
             // this should trigger attributeChangedCallback on all sub-components
-            allsubcomp.forEach( comp => comp._props = comp._props )
+            mostsubcomp.forEach( comp => comp._props = comp._props )
         })
     }
 

@@ -15,9 +15,14 @@
             const template = self.shadowRoot.querySelector("slot");
             const mroot = self.shadowRoot.querySelector("#mult-root");
 
+            const templateEl = template.assignedElements()[0];
+
+            // before all this, don't ignore this thing
+            templateEl.classList.remove("hearsay-ignore");
+
             const els = propsArray.map((props, i) =>
             {
-                const el = template.assignedElements()[0].cloneNode(true);
+                const el = templateEl.cloneNode(true);
                 el._props = JSON.stringify(props);
                 el.setAttribute("index", i);
                 el.component = self.component;
@@ -36,6 +41,9 @@
                 return el;
 
             } );
+
+            // after all that, ignore this thing
+            templateEl.classList.add("hearsay-ignore");
 
             mroot.replaceChildren(...els);
         },
