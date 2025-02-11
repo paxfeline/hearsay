@@ -28,60 +28,67 @@ class HearSay extends HTMLElement
             this.setAttribute("src", "Multiplier.html");
         }
 
+        let startPromise;
         // fetch the component html file
         // and attach a shadow DOM
         if (this.hasAttribute("src"))
         {
-            fetch(this.getAttribute("src"))
-            .then( res => res.text() )
-            .then( txt => this.attachShadow({mode: "open"}).innerHTML = txt )
-            .then( () =>
-            {
-                // keep track of the element currently being inited
-                hearsay.elements = {current: this, previous: hearsay.elements?.current};
-    
-                // if a script is present, it's not run by default.
-                // create a new script element, copy the code,
-                // and replace the non-functional script element with it.
-                const oldScript = this.shadowRoot.querySelector("script");
-                if (oldScript)
-                {
-                    const newScript = document.createElement("script");
-                    newScript.textContent = oldScript.textContent;
-                    oldScript.replaceWith(newScript);
-                }
-    
-                // add "component" property to all children of regular and shadrow root
-                const addComponentAttribute = (el, skip_root) =>
-                {
-                    //console.log(el);
-                    skip_root || (el.component = this);
-                    Array.from(el.children || []).forEach(rel => addComponentAttribute(rel));
-                }
-                addComponentAttribute(this, true);
-                addComponentAttribute(this.shadowRoot);
-                
-                // get j-s elements from regular and shadow DOM
-                const hsregjs = this.querySelectorAll("j-s");
-                addComponentAttribute({children: hsregjs}, true);
-                const hsshajs = this.shadowRoot.querySelectorAll("j-s");
-                addComponentAttribute({children: hsshajs}, true);
-    
-                // revert elements
-                hearsay.elements = hearsay.elements.previous;
-
-                // connection complete
-
-                // used to help subcomponents
-                this.inited = true;
-        
-                // user-provided callback
-                this.connected?.(this);
-        
-                // update j-s and child components
-                this.refreshCallback();
-            } )
+            startPromise =
+                fetch(this.getAttribute("src"))
+                .then( res => res.text() )
+                .then( txt => this.attachShadow({mode: "open"}).innerHTML = txt );
         }
+        else
+            startPromise = Promise.resolve();
+        
+        startPromise.then( () =>
+        {
+            // keep track of the element currently being inited
+            hearsay.elements = {current: this, previous: hearsay.elements?.current};
+
+            // if a script is present, it's not run by default.
+            // create a new script element, copy the code,
+            // and replace the non-functional script element with it.
+            const oldScript = this.shadowRoot?.querySelector("script");
+            if (oldScript)
+            {
+                const newScript = document.createElement("script");
+                newScript.textContent = oldScript.textContent;
+                oldScript.replaceWith(newScript);
+            }
+
+            // add "component" property to all children of regular and shadrow root
+            const addComponentAttribute = (el, skip_root) =>
+            {
+                //console.log(el);
+                if (!skip_root && el) el.component = this;
+                Array.from(el?.children || []).forEach(rel => addComponentAttribute(rel));
+            }
+            addComponentAttribute(this, true);
+            addComponentAttribute(this.shadowRoot);
+
+            console.log("comp added", this);
+            
+            // get j-s elements from regular and shadow DOM
+            const hsregjs = this.querySelectorAll("j-s");
+            addComponentAttribute({children: hsregjs}, true);
+            const hsshajs = this.shadowRoot?.querySelectorAll("j-s");
+            addComponentAttribute({children: hsshajs}, true);
+
+            // revert elements
+            hearsay.elements = hearsay.elements.previous;
+
+            // connection complete
+
+            // used to help subcomponents
+            this.inited = true;
+    
+            // user-provided callback
+            this.connected?.(this);
+    
+            // update j-s and child components
+            this.refreshCallback();
+        } )
     }
 
     // other custom element lifecycle callbacks:
@@ -110,28 +117,31 @@ class HearSay extends HTMLElement
 
     refreshCallback()
     {
-        //console.log("updating subcomps");
-
-        // recalculate j-s elements in this component
-
-        const hsregjs = this.querySelectorAll("j-s");
-        const hsshajs = this.shadowRoot?.querySelectorAll("j-s") || [];
-
-        const alljs = Array.from(hsregjs).concat(Array.from(hsshajs));
-        alljs.forEach( js => js.run() );
-
-        // update the props attribute of all sub-components
-
-        const subcompsreg = this.querySelectorAll("hear-say");
-        const subcompssha = this.shadowRoot?.querySelectorAll("hear-say") || [];
-
-        const allsubcomp = Array.from(subcompsreg).concat(Array.from(subcompssha));
-
-        // this should trigger attributeChangedCallback on all sub-components
-        allsubcomp.forEach( comp => comp._props = comp._props )
-
         // user callback
-        this.refresh?.(this);
+        Promise.resolve()
+        .then(() => this.refresh?.(this))
+        .then(() =>
+        {
+            //console.log("updating subcomps");
+    
+            // recalculate j-s elements in this component
+    
+            const hsregjs = this.querySelectorAll("j-s");
+            const hsshajs = this.shadowRoot?.querySelectorAll("j-s") || [];
+    
+            const alljs = Array.from(hsregjs).concat(Array.from(hsshajs));
+            alljs.forEach( js => js.run() );
+    
+            // update the props attribute of all sub-components
+    
+            const subcompsreg = this.querySelectorAll("hear-say");
+            const subcompssha = this.shadowRoot?.querySelectorAll("hear-say") || [];
+    
+            const allsubcomp = Array.from(subcompsreg).concat(Array.from(subcompssha));
+    
+            // this should trigger attributeChangedCallback on all sub-components
+            allsubcomp.forEach( comp => comp._props = comp._props )
+        })
     }
 
     /* util functions */
@@ -187,42 +197,31 @@ class HearSay extends HTMLElement
        
         const self = this;
 
-        function makePropsPropsProxy(propsVal, propsData, prop)
+        function makePropsPropsProxy(propsVal, propsDataHolder, prop)
         {
             // kind of fudgey way to DRY
-            const targetObj = { propsVal, propsData, prop };
+            const targetObj = { propsVal, propsDataHolder, prop };
             const propsPropsProxyHandler =
             {
                 get(target, pprop)
                 {
                     let propsDataVal = target.prop ?
-                        target.propsData[target.prop] :
-                        target.propsData;
-                    const val = propsDataVal?.[pprop] || target.propsVal[pprop];
-
-                    if (pprop == "length")
-                    {
-                        console.log("len", this);
-                        return this.getOwnKeys(target).length;
-                    }
+                        target.propsDataHolder[target.prop] :
+                        target.propsDataHolder;
+                    const val = target.propsVal?.[pprop];
                     
                     if (pprop == "toJSON")
                     {
                         console.log("toJSON", target);
-                        return () => // a function
-                            ({
-                                ...(target.propsVal || {}),
-                                ...(propsDataVal || {})
-                            });
+                        return () => target.propsVal;
                     }
                     
                     //const val = propsDataChain[prop][pprop] || propsChain[prop][pprop];
-                    if (typeof val == "object")
+                    if (typeof val == "object" && val !== null)
                     {
-                        if (!propsDataVal)
-                            propsDataVal = target.propsData[target.prop] = {};
+                        if (propsDataVal == undefined)
+                            propsDataVal = target.propsDataHolder[target.prop] = {};
                         return makePropsPropsProxy(target.propsVal[pprop], propsDataVal, pprop)
-                        //return makePropsPropsProxy(propsChain[prop], propsDataChain[prop], pprop)
                     }
                     else
                         return val;
@@ -231,7 +230,7 @@ class HearSay extends HTMLElement
                 set(target, pprop, val, receiver)
                 {
                     console.log("set prop proxy prop", target, pprop, val, receiver);
-                    let t = target.propsData;
+                    let t = target.propsDataHolder;
                     if (target.prop)
                     {
                         if (!t[target.prop]) t[target.prop] = {};
@@ -243,45 +242,107 @@ class HearSay extends HTMLElement
                     self.props = self.propsData;
                 },
 
-                getOwnKeys(target)
-                {
-                    console.log("gok");
-                    return Array.from(
-                        new Set(
-                            [
-                                ...Object.keys(target.propsVal || {}),
-                                ...Object.keys(target.propsData || {})
-                            ]
-                        ));
-                },
-
                 deleteProperty(target, prop)
                 {
-                    let t = target.propsData;
+                    let t = target.propsDataHolder;
                     if (target.prop) t = t[target.prop];
                     if (prop in t) delete t[prop];
                     // trigger update
                     self.props = self.propsData;
+                },
+
+                apply(target, thisArgument, argumentsList)
+                {
+                    Reflect.apply(target.propsVal, thisArgument, argumentsList);
+                },
+
+                construct(target, argumentsList, newTarget)
+                {
+                    Reflect.construct(target.propsVal, argumentsList, newTarget)
+                },
+                
+                getOwnPropertyDescriptor(target, propertyKey)
+                {
+                    Reflect.getOwnPropertyDescriptor(target.propsVal, propertyKey);
+                },
+                
+                getPrototypeOf(target)
+                {
+                    Reflect.getPrototypeOf(target.propsVal)
+                },
+                
+                has(target, propertyKey)
+                {
+                    Reflect.has(target.propsVal, propertyKey);
+                },
+                
+                isExtensible(target)
+                {
+                    Reflect.isExtensible(target.propsVal);
+                },
+                
+                ownKeys(target)
+                {
+                    Reflect.ownKeys(target.propsVal);
+                },
+                
+                /*
+                defineProperty(target, propertyKey, attributes)
+                {
+                    Reflect.defineProperty(target.propsVal, propertyKey, attributes)
+                },
+
+                preventExtensions(target)
+                {
+                    Reflect.preventExtensions(target.propsVal);
+                },
+
+                setPrototypeOf(target, prototype)
+                {
+                    Reflect.setPrototypeOf(target.propsVal, prototype)
                 }
+                    */
             }
             const proxy = new Proxy(targetObj, propsPropsProxyHandler);
             return proxy;
         }
-
-        if (this.propsData != null && typeof this.propsData != "object")
-            return this.propsData || this.propsVal;
         
-        const propVal = prop_func(this);
+        if (this.propsData != null && typeof this.propsData != "object")
+            return this.propsData;
+        
+        const propsVal = prop_func(this);
 
-        if (!this.propsData)
+        if (this.propsData == null)
         {
-            if (typeof propVal != "object")
-                return propVal;
-            
+            if (typeof propsVal != "object" || Array.isArray(propsVal) || propsVal === null)
+                return propsVal;
+
             // create propsData because may be needed
-            this.propsData = {};
+            //this.propsData = {};
         }
-        const proxy = makePropsPropsProxy(propVal, this.propsData);
+            
+        const merge = (target, source) =>
+        {
+            for (const prop in source)
+            {
+                const val = target[prop];
+                const sval = source[prop];
+        
+                if (sval)
+                {
+                    if (typeof sval != "object" || Array.isArray(sval)) // primitives and arrays
+                        target[prop] = sval;
+                    else if (typeof val == "object") // val and sval are objects
+                    {
+                        merge(val, sval);
+                    }
+                }
+            }
+        }
+
+        merge(propsVal, this.propsData);
+        
+        const proxy = makePropsPropsProxy(propsVal, this, "propsData");
 
         return proxy;
 

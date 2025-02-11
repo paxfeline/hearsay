@@ -1,23 +1,11 @@
 <style>
-    .square {
-      background: #fff;
-      border: 1px solid #999;
-      float: left;
-      font-size: 24px;
-      font-weight: bold;
-      line-height: 34px;
-      height: 34px;
-      margin-right: -1px;
-      margin-top: -1px;
-      padding: 0;
-      text-align: center;
-      width: 34px;
-    }
-
 .board-row:after {
   clear: both;
   content: '';
   display: table;
+}
+.status {
+  margin-bottom: 10px;
 }
 </style>
 
@@ -25,30 +13,76 @@
     setup({
         init: self =>
         {
-            self.props = Array(9).fill(null);
-            self.state = {turn: 'X'};
+            console.log("board init")
+            self.state = {turn: 'X', history: []};
+            self.props.board = Array(9).fill(null);
+            self.props.status = "Next player: X"
         },
         react: (self, data, recipient) =>
         {
             console.log(self, data, recipient);
-            self.props[recipient] = self.state.turn;
+            if (self.props.board[recipient]) return;
+            self.props.board[recipient] = self.state.turn;
+            self.state.history.push([...self.props.board]);
             self.state.turn = self.state.turn == 'X' ? 'O' : 'X';
+            const winner = self.calculateWinner(self.props.board);
+            let status;
+            if (winner) {
+                status = "Winner: " + winner;
+            } else {
+                status = "Next player: " + self.state.turn;
+            }
+            self.props.status = status;
+        },
+        calculateWinner: (squares) =>
+        {
+            const lines = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+            for (let i = 0; i < lines.length; i++) {
+                const [a, b, c] = lines[i];
+                if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+                return squares[a];
+                }
+            }
+            return null;
         }
     })
 </script>
 
+<div className="status">
+    <j-s>
+        self.component.props.status || ''
+    </j-s>
+</div>
+
 <div class="board-row">
-    <hear-say src="Square.html" props="self.component.props[0]" key="0"></hear-say>
-    <hear-say src="Square.html" props="self.component.props[1]" key="1"></hear-say>
-    <hear-say src="Square.html" props="self.component.props[2]" key="2"></hear-say>
+    <hear-say src="Square.html" props="self.component.props.board[0]" key="0"></hear-say>
+    <hear-say src="Square.html" props="self.component.props.board[1]" key="1"></hear-say>
+    <hear-say src="Square.html" props="self.component.props.board[2]" key="2"></hear-say>
 </div>
 <div class="board-row">
-    <hear-say src="Square.html" props="self.component.props[3]" key="3"></hear-say>
-    <hear-say src="Square.html" props="self.component.props[4]" key="4"></hear-say>
-    <hear-say src="Square.html" props="self.component.props[5]" key="5"></hear-say>
+    <hear-say src="Square.html" props="self.component.props.board[3]" key="3"></hear-say>
+    <hear-say src="Square.html" props="self.component.props.board[4]" key="4"></hear-say>
+    <hear-say src="Square.html" props="self.component.props.board[5]" key="5"></hear-say>
 </div>
 <div class="board-row">
-    <hear-say src="Square.html" props="self.component.props[6]" key="6"></hear-say>
-    <hear-say src="Square.html" props="self.component.props[7]" key="7"></hear-say>
-    <hear-say src="Square.html" props="self.component.props[8]" key="8"></hear-say>
+    <hear-say src="Square.html" props="self.component.props.board[6]" key="6"></hear-say>
+    <hear-say src="Square.html" props="self.component.props.board[7]" key="7"></hear-say>
+    <hear-say src="Square.html" props="self.component.props.board[8]" key="8"></hear-say>
 </div>
+
+<hear-say multiplier props="((self) => (console.log(42), self.component.state.history))(self)">
+    <hear-say>
+        <j-s>
+            JSON.stringify(self.component.props)
+        </j-s>
+    </hear-say>
+</hear-say>

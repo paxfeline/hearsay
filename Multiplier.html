@@ -2,7 +2,7 @@
     setup({
         init: (self) =>
         {
-            console.log("init", self.innerHTML);
+            //console.log("init", HearSay.observedAttributes);
 
             self.refresh(self);
         },
@@ -15,10 +15,24 @@
             const template = self.shadowRoot.querySelector("slot");
             const mroot = self.shadowRoot.querySelector("#mult-root");
 
-            const els = propsArray.map(props =>
+            const els = propsArray.map((props, i) =>
             {
                 const el = template.assignedElements()[0].cloneNode(true);
                 el._props = JSON.stringify(props);
+                el.setAttribute("index", i);
+                el.component = self.component;
+                Object.defineProperty(el, "index",
+                {
+                    get()
+                    {
+                        return Number(el.getAttribute("index"));
+                    },
+                    set(val)
+                    {
+                        el.setAttribute("index", val);
+                    }
+                });
+                Promise.resolve().then(() => el?.refreshCallback());
                 return el;
 
             } );
@@ -28,11 +42,11 @@
         react: (self, data, recipient) =>
         {
             ;
-        },
+        }
     });
 </script>
 
-<slot></slot>
+<slot style="display: none"></slot>
 
 <div id="mult-root"></div>
 
