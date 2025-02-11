@@ -79,7 +79,7 @@
     <hear-say src="Square.html" props="self.component.props.board[8]" key="8"></hear-say>
 </div>
 
-<hear-say multiplier props="((self) => (console.log(42), self.component.state.history))(self)">
+<hear-say multiplier props="self.component.state.history">
     <hear-say>
         <j-s>
             JSON.stringify(self.component.props)
