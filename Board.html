@@ -14,24 +14,44 @@
         init: self =>
         {
             console.log("board init")
-            self.state = {turn: 'X'};
             self.props.board = Array(9).fill(null);
             self.props.status = "Next player: X"
+            self.state = {turn: 0, history: [[...self.props.board]]};
         },
         react: (self, data, recipient) =>
         {
             console.log(self, data, recipient);
-            if (self.props.board[recipient]) return;
-            self.props.board[recipient] = self.state.turn;
-            self.state.turn = self.state.turn == 'X' ? 'O' : 'X';
-            const winner = self.calculateWinner(self.props.board);
-            let status;
-            if (winner) {
-                status = "Winner: " + winner;
-            } else {
-                status = "Next player: " + self.state.turn;
+            if (data == "set")
+            {
+                if (self.props.board[recipient]) return;
+                self.props.board[recipient] = self.state.turn % 2 == 0 ? "X" : "O";
+                self.state.history.push([...self.props.board]);
+                self.state.turn++;
+                const winner = self.calculateWinner(self.props.board);
+                let status;
+                if (winner) {
+                    status = "Winner: " + winner;
+                } else {
+                    status = "Next player: " + (self.state.turn % 2 == 0 ? "X" : "O");
+                }
+                console.log(status);
+                self.props.status = status;
             }
-            self.props.status = status;
+            else if (data == "jump")
+            {
+                self.state.turn = recipient; // little hacky but hey
+                self.props.board[recipient] = self.state.turn % 2 == 0 ? "X" : "O";
+                self.props.board = [...self.state.history[self.state.turn]];
+                self.state.history.length = self.state.turn + 1;
+                const winner = self.calculateWinner(self.props.board);
+                let status;
+                if (winner) {
+                    status = "Winner: " + winner;
+                } else {
+                    status = "Next player: " + (self.state.turn % 2 == 0 ? "X" : "O");
+                }
+                self.props.status = status;
+            }
         },
         calculateWinner: (squares) =>
         {
@@ -77,3 +97,16 @@
     <hear-say src="Square.html" props="self.component.props.board[7]" key="7"></hear-say>
     <hear-say src="Square.html" props="self.component.props.board[8]" key="8"></hear-say>
 </div>
+
+<hear-say map props="self.component.state.history">
+    <hear-say>
+        <div>
+            <button onclick="broadcast('jump', this.component.index)">
+                Go to turn
+                <j-s>
+                    self.component.index
+                </j-s>
+            </button>
+        </div>
+    </hear-say>
+</hear-say>
